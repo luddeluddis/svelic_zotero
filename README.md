@@ -22,3 +22,8 @@ Zotero comes with an UpToDate translator that enables saving references from the
 
 #### Vancouver_unnumbered_bibliography
 This style is an alteration of the default CSL file Vancouver where the numbering of the bibliography has been removed. You are thus forced to use numbered lists in Microsoft Word or corresponding software to number the bibliography. As a result the numbers are easy to remove when transfering the bibliography to the RELIS database. 
+
+## Installation
+Zotero translators should be placed in the “translators” subdirectory of the [Zotero data directory](https://www.zotero.org/support/zotero_data#locating_your_zotero_library "/support/zotero_data#locating_your_zotero_library").
+
+For installation of styles see [this Zotero support page](https://www.zotero.org/support/styles).

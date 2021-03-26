@@ -1,2 +1,4 @@
-# svelic_zotero
-Zotero related files shared between drug information centrals in Sweden
+# LIC and Zotero
+This repository contains Zotero related files developed to facilitate work when using Zotero within drug information centrals in Sweden.
+
+## 

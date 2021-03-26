@@ -14,7 +14,7 @@ The translator saves a loaded investigation from the the Swedish drug informatio
 >Risker med amning vid behandling med piperacillin/tazobaktam (pip/taz)? [Internet]. LUPP, id. nr. 282. RELIS databas; 2017 [citerad 26 mars 2021]. Tillgänglig vid: https://svelic.se/utredning/?id=11-282
 
 ### UpToDate_article
-Zotero comes with an UpToDate translator that enables saving references from the bibliography of [UpToDate] articles. This translator will replace the default translator (Zotero appears to be sorting translators in alphabetical order) and will save the loaded UpToDate article as an item in Zotero. Like the original translator this translator has some problem sensing an article the first time it is loaded and you often need to initially load another article. When using Vancouver the reference will appear as follows:
+Zotero comes with an UpToDate translator that enables saving references from the bibliography of [UpToDate](https://www.uptodate.com/) articles. This translator will replace the default translator (Zotero appears to be sorting translators in alphabetical order) and will save the loaded UpToDate article as an item in Zotero. Like the original translator this translator has some problem sensing an article the first time it is loaded and you often need to initially load another article. When using Vancouver the reference will appear as follows:
 
 >Plon SE, Jonasch E. Molecular biology and pathogenesis of von Hippel-Lindau disease [Internet]. Shah S, redaktör. UpToDate. UpToDate, Waltham, MA; 2020 [citerad 26 mars 2021]. Tillgänglig vid: http://www.uptodate.com
 

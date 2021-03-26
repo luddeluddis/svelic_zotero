@@ -4,7 +4,7 @@ This repository contains Zotero related files developed to simplify working with
 ## Translators
 
 ### FASS
-The translator imports the current loaded drug information from the Swedish drug database [FASS](https://www.fass.se/) as an item in Zotero. To activate the translator the view "Produktresumé" need to be loaded as this exposes the date when the SPC was last updated. When using Vancouver the reference will appear as follows (using the SPC for Waran and swedish language):
+The translator imports the current loaded drug information from the Swedish drug database [FASS](https://www.fass.se/) as an item in Zotero. To activate the translator the view "Produktresumé" needs to be loaded as this exposes the date when the SPC was last updated. When using Vancouver the reference will appear as follows (using the SPC for Waran and swedish language):
 
 >Waran (warfarin). SPC, Läkemedelsverket [Internet]. 10 november 2020 [citerad 26 mars 2021]; Tillgänglig vid: http://www.fass.se
  

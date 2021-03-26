@@ -26,4 +26,4 @@ This style is an alteration of the default CSL file Vancouver where the numberin
 ## Installation
 Zotero translators should be placed in the “translators” subdirectory of the [Zotero data directory](https://www.zotero.org/support/zotero_data#locating_your_zotero_library "/support/zotero_data#locating_your_zotero_library").
 
-For installation of styles see [this Zotero support page](https://www.zotero.org/support/styles).
+For installation of styles see the Zotero support page on [Citation Styles](https://www.zotero.org/support/styles).

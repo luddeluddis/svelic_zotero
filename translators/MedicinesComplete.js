@@ -24,7 +24,7 @@ function doWeb(doc, url) {
 	// create standard reference for Lexicomp
 	var item = new Zotero.Item("book");
 
-	item.url = "http://www.medicinescomplete.com/";
+	item.url = "https://www.medicinescomplete.com/";
 	item.publisher = "Pharmaceutical Press";
 	item.place = "London, UK";
 	//item.date = "uppdateras periodiskt";

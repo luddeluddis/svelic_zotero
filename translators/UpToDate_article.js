@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 		item.creators.push(Zotero.Utilities.cleanAuthor(deputy_editor,"editor"))
 		item.title = title;
 		item.date = updated;
-		item.url = "http://www.uptodate.com";
+		item.url = "https://www.uptodate.com";
 		item.publicationTitle = "UpToDate";
 		item.place = "UpToDate, Waltham, MA"
 

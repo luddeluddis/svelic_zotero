@@ -61,5 +61,6 @@ Zotero translators should be placed in the “translators” subdirectory of the
 For installation of styles, see the Zotero support page on [Citation Styles](https://www.zotero.org/support/styles).
 
 ## Updates
-2022-08-01: FASS, SVELIC and UpToDate translators updated. New translators added: Janusmed, MedicinesComplete, Micromedex and Lexicomp. Vancouver_unnumbered_bibliography updated.
-2021-03-26: Repository created. FASS, SVELIC and UpToDate translators added. Vancouver_unnumbered_bibliography added.
+**2022-08-01**: FASS, SVELIC and UpToDate translators updated. New translators added: Janusmed, MedicinesComplete, Micromedex and Lexicomp. Vancouver_unnumbered_bibliography updated.
+
+**2021-03-26**: Repository created. FASS, SVELIC and UpToDate translators added. Vancouver_unnumbered_bibliography added.

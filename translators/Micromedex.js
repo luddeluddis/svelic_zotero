@@ -32,7 +32,7 @@ function doWeb(doc, url) {
 		"creatorType": "author"
 	});
 
-	item.url = "http://www.micromedexsolutions.com/";
+	item.url = "https://www.micromedexsolutions.com/";
 	item.publisher = "IBM Watson Health";
 	item.place = "Greenwood Village, Colorado, USA";
 

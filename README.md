@@ -29,7 +29,7 @@ When using the Vancouver style the reference will appear as follows (using Lexi-
 The translator will save a reference for a selection of databases/publications available (as a subscription) via [MedicinesComplete](https://www.medicinescomplete.com/). The translator detects which publication is loaded and will then return a prespecified reference (conforming to the [citation recommendations of MedicinesComplete](https://about.medicinescomplete.com/copyright/)). The following databases/publication will be detected: Stockley's Drug Interactions, Stockley's Herbal Medicines Interactions, Pharmaceutical Excipients, Injectable Drugs Guide, Herbal Medicines, Briggs Drugs in Pregnancy and Lactation, British National Formulary for Children.
 
 When using the Vancouver style the reference can appear as follows (using Stockley's Drug Interactions as an example):
->Preston C, redaktör. Stockley’s Drug Interactions [Internet]. London, UK: Pharmaceutical Press; [citerad 29 juli 2022]. Tillgänglig vid: http://www.medicinescomplete.com/
+>Preston C, redaktör. Stockley’s Drug Interactions [Internet]. London, UK: Pharmaceutical Press; [citerad 29 juli 2022]. Tillgänglig vid: https://www.medicinescomplete.com/
 
 
 ### Micromedex

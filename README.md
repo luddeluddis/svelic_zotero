@@ -12,7 +12,7 @@ When using Vancouver the reference will appear as follows (using the SPC for Wak
 
 
 ### Janusmed
-The translator will save a reference from the Swedish drug information tool [Janusmed](https://janusmed.se/). If a specific tool (ie "Janusmed interaktioner") is loaded, this information will also be included in the reference. This translator will not fetch any information from the webpage, only deduce which tool is loaded.
+The translator will save a reference from the Swedish drug information tool [Janusmed](https://janusmed.se/). If a specific tool (e.g. "Janusmed interaktioner") is loaded, this information will also be included in the reference. This translator will not fetch any information from the webpage, only deduce which tool is loaded.
 
 When using Vancouver the reference will appear as follows (using "Janusmed interaktioner" as an example):
 >Janusmed interaktioner [Internet]. Stockholm: Hälso- och sjukvårdsförvaltningen, Region Stockholm; [citerad 29 juli 2022]. Tillgänglig vid: https://janusmed.se

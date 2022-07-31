@@ -50,7 +50,7 @@ function doWeb(doc, url) {
 	});
 	item.title = handelsnamn_trimmed + " (" + generika_trimmed.toLowerCase() + "), Produktresumé (SPC)";
 	item.date = Zotero.Utilities.trimInternal(uppdaterat.match('^[^\S]*')[0]);
-	item.url = "http://www.fass.se";
+	item.url = "https://www.fass.se";
 	item.publisher = "Läkemedelsverket";
 	item.place = "Uppsala"
 

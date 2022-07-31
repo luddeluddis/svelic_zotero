@@ -8,7 +8,7 @@ The translator imports reference information from the current loaded Summaries o
 
 When using Vancouver the reference will appear as follows (using the SPC for Wakix and swedish language in Zotero):
 
->AOP Orphan Pharmaceuticals. Wakix (pitolisant), Produktresumé (SPC) [Internet]. Uppsala: Läkemedelsverket; 2021 [citerad 29 juli 2022]. Tillgänglig vid: http://www.fass.se
+>AOP Orphan Pharmaceuticals. Wakix (pitolisant), Produktresumé (SPC) [Internet]. Uppsala: Läkemedelsverket; 2021 [citerad 29 juli 2022]. Tillgänglig vid: https://www.fass.se
 
 
 ### Janusmed
@@ -34,7 +34,7 @@ When using the Vancouver style the reference can appear as follows (using Stockl
 The translator will save a reference for the drug information service [Micromedex](https://www.micromedexsolutions.com/). For some modules/databases (Drug interactions, IV compatibility etc) the specific name of the database/module will be included. For Drugdex, the translator will also fetch the name of the substance and the date when the monograph was last updated (if the "View full document" of "In-Depth Answers" is loaded).
 
 When using the Vancouver style the reference can appear as follows (using Drugdex and trabectedin as an example):
->MICROMEDEX® Healthcare Series. IDARUCIZUMAB [Internet]. DRUGDEX Evaluations. Greenwood Village, Colorado, USA: IBM Watson Health; 2022 [citerad 29 juli 2022]. Tillgänglig vid: http://www.micromedexsolutions.com/
+>MICROMEDEX® Healthcare Series. IDARUCIZUMAB [Internet]. DRUGDEX Evaluations. Greenwood Village, Colorado, USA: IBM Watson Health; 2022 [citerad 29 juli 2022]. Tillgänglig vid: https://www.micromedexsolutions.com/
 
 ### SVELIC
 The SVELIC translator will save a reference for the loaded investigation from the Swedish drug information website [SVELIC](https://svelic.se/) (a frontend for the norwegian/swedish database RELIS). Using the Vancouver style, the translator will format the reference to comply with the RELIS reference formatting to enable internal linking when publishing the reference list on SVELIC or [RELIS](https://relis.no/). 
@@ -47,7 +47,7 @@ By default Zotero includes an UpToDate translator that enables saving references
 
 When using the Vancouver style the reference may appear as follows:
 
->Plon SE, Jonasch E. Molecular biology and pathogenesis of von Hippel-Lindau disease. I: Shah S, redaktör. UpToDate [Internet]. UpToDate, Waltham, MA; 2021 [citerad 29 juli 2022]. Tillgänglig vid: http://www.uptodate.com
+>Plon SE, Jonasch E. Molecular biology and pathogenesis of von Hippel-Lindau disease. I: Shah S, redaktör. UpToDate [Internet]. UpToDate, Waltham, MA; 2021 [citerad 29 juli 2022]. Tillgänglig vid: https://www.uptodate.com
 
 
 ## Styles

@@ -57,7 +57,10 @@ When using the Vancouver style the reference may appear as follows:
 ## Styles
 
 #### Vancouver_unnumbered_bibliography
-This style is a very slight alteration of the default CSL file Vancouver (version 2022-04-14) where the numbering of the bibliography has been removed. You are thus forced to use numbered lists in Microsoft Word or corresponding software to number the bibliography. As a result, the numbers are easy to remove when transferring the bibliography to the RELIS database. In essence the following two code blocks has been deleted from the default vancouver CSL style: ```<text variable="citation-number" suffix=". "/>``` and ```second-field-align="flush"```.
+This style is a slight alteration of the default CSL file Vancouver (version 2022-04-14) where the numbering of the bibliography has been removed. You are thus forced to use numbered lists in Microsoft Word or corresponding software to number the bibliography. As a result, the numbers are easy to remove when transferring the bibliography to the RELIS database. This version also displays the full reference date for webpages (and other item types) instead of just the year.
+
+To remove the numbering the following two code blocks has been deleted from the default vancouver CSL style: ```<text variable="citation-number" suffix=". "/>``` and ```second-field-align="flush"```.
+To change how the date diplays the ```<else>``` clause in the function ```<macro name="date">``` has been replaced with the code from the ```<if type="article-journal...```.
 
 ## Installation
 Zotero translators should be placed in the “translators” subdirectory of the [Zotero data directory](https://www.zotero.org/support/zotero_data#locating_your_zotero_library "/support/zotero_data#locating_your_zotero_library").

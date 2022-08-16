@@ -36,11 +36,13 @@ function doWeb(doc, url) {
 	var LIC = info.match('[^,]*$')[0];
 	var databas = 'RELIS database';
 	var idnr = info.match('id.nr. [^,]*')[0].substring(7);
+	var linkurl = doc.location.href;
+	//var linkurl = 'www.svelic.se'
 	
 	//Combine strings to achieve (almost) correct citation format according to RELIS homepage guidelines:
 	// RELIS database [årtal]; [Titel]. id.nr. [tal], [LICnamn]. (www.svelic.se)
 	// e.g. RELIS database 2022; Isotretinoin för patienter med jordnöts- eller sojaallergi. id.nr. 1019, LUPP. (www.svelic.se)
-	var combined_info = title + '. Id.nr. ' +  idnr + ',' + LIC + '. (www.svelic.se)' ;
+	var combined_info = title + '. Id.nr. ' +  idnr + ',' + LIC + '. (' + linkurl + ')' ;
 	var databas_info = databas + ' ' + year
 
 	// if question mark in title, then remove the following period that emerged when combining the strings

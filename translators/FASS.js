@@ -14,7 +14,7 @@
 
 function detectWeb(doc, url) {
 	var test = ZU.xpathText(doc, '//*[@id="list-of-contents"]/article/header/div[1]/h2')
-	if (url.includes('docType=[3,6]+') || test == "Fass-text"){
+	if (url.match('docType=[3,6]{1}&') || test == "Fass-text"){
 		return 'journalArticle';
 	}
 }

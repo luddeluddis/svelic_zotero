@@ -1,4 +1,4 @@
-# LIC and Zotero
+ate# LIC and Zotero
 This repository contains Zotero-related files developed to simplify creation and management of citations within drug information centrals in Sweden.
 
 ## Zotero Translators
@@ -69,6 +69,6 @@ Zotero translators should be placed in the “translators” subdirectory of the
 For installation of styles, see the Zotero support page on [Citation Styles](https://www.zotero.org/support/styles).
 
 ## Updates
+**2023-08-18**: UpToDate translator updated (last update date not retrieved).
 **2022-08-01**: FASS, SVELIC and UpToDate translators updated. New translators added: Janusmed, MedicinesComplete, Micromedex and Lexicomp. Vancouver_unnumbered_bibliography updated.
-
 **2021-03-26**: Repository created. FASS, SVELIC and UpToDate translators added. Vancouver_unnumbered_bibliography added.

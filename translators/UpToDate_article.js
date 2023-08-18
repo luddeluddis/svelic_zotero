@@ -59,7 +59,7 @@ function doWeb(doc, url) {
 		// get title 
 		var title = ZU.xpathText(doc,'//*[@id="topicTitle"]');
 		// get date of last update
-		var updated = ZU.xpathText(doc,'//*[@id="literatureReviewDate"]/text()[2]');
+		var updated = ZU.xpathText(doc, '//div[@class="litReviewSingleLine"]/span[contains(text(), "This topic last updated:")]/following-sibling::text()[1]');
 		//Zotero.debug(updated);
 		
 		// populate the reference (the item)

@@ -1,4 +1,4 @@
-ate# LIC and Zotero
+# LIC and Zotero
 This repository contains Zotero-related files developed to simplify creation and management of citations within drug information centrals in Sweden.
 
 ## Zotero Translators

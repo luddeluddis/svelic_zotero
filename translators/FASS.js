@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-28 10:49:02"
+	"lastUpdated": "2025-11-28 12:11:02"
 }
 
 function detectWeb(doc, url) {
@@ -23,8 +23,8 @@ function doWeb(doc, url) {
 	var item = new Zotero.Item("journalArticle");
 
 	// --- Handelsnamn ---
-	// take everything up to the first comma
-	// We use the CSS selector h1.break-words
+	// Take everything up to the first comma
+	// Using CSS selector
 	var handelsnamn = "";
 	var titleElement = doc.querySelector("h1.break-words");
 	if (titleElement) {
@@ -53,11 +53,18 @@ function doWeb(doc, url) {
 	generika = ZU.trimInternal(generika);
 
 	// --- Bolag ---
+	// Take everything up to the first comma
 	// Using CSS Selector
 	var bolag = "";
 	var bolagElement = doc.querySelector(".text-button-sm");
 	if (bolagElement) {
-		bolag = bolagElement.textContent;
+		var fullBolag = bolagElement.textContent;
+		// Split by comma and take the first part
+		if (fullBolag.includes(",")) {
+			bolag = fullBolag.split(",")[0];
+		} else {
+			bolag = fullBolag;
+		}
 	}
 	bolag = ZU.trimInternal(bolag);
 

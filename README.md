@@ -8,8 +8,7 @@ The translator imports reference information from the current loaded Summaries o
 
 When using Vancouver the reference will appear as follows (using the SPC for Wakix and swedish language in Zotero):
 
->AOP Orphan Pharmaceuticals. Wakix (pitolisant), Produktresumé (SPC) [Internet]. Uppsala: Läkemedelsverket; 2021 [citerad 29 juli 2022]. Tillgänglig vid: https://www.fass.se
-
+>Zambon Sweden. Wakix (pitolisant), Produktresumé (SPC). 24 februari 2023 [citerad 28 november 2025]; Tillgänglig vid: https://www.fass.se
 
 ### Janusmed
 The translator will save a reference from the Swedish drug information tool [Janusmed](https://janusmed.se/). If a specific tool (e.g. "Janusmed interaktioner") is loaded, this information will also be included in the reference. This translator will not fetch any information from the webpage, only deduce which tool is loaded.

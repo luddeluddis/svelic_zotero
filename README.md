@@ -4,7 +4,7 @@ This repository contains Zotero-related files developed to simplify creation and
 ## Zotero Translators
 
 ### FASS
-The translator imports reference information from the current loaded Summaries of Product Characteristics (SPC) for a drug from the Swedish drug database [FASS](https://www.fass.se/). To activate the translator any of the views "FASS-text" or "Produktresumé" must be loaded. The translator will fetch information about product name, marketing-authorisation holder and date when the SPC was last updated. 
+The translator imports reference information from the current loaded Summaries of Product Characteristics (SPC) for a drug from the Swedish drug database [FASS](https://www.fass.se/). To activate the translator for a drug, the page/button "Produktresumé" must be loaded/clicked. The translator will fetch information about product name, marketing-authorisation holder and date when the SPC was last updated. 
 
 When using Vancouver the reference will appear as follows (using the SPC for Wakix and swedish language in Zotero):
 

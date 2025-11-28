@@ -23,7 +23,7 @@ function doWeb(doc, url) {
 	var item = new Zotero.Item("journalArticle");
 
 	// --- Handelsnamn ---
-	// h1.break-words, take everything up to the first comma
+	// take everything up to the first comma
 	// We use the CSS selector h1.break-words
 	var handelsnamn = "";
 	var titleElement = doc.querySelector("h1.break-words");

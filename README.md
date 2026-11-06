@@ -76,6 +76,12 @@ The installers skip unchanged files, back up replaced files, and ask whether to 
 
 See the [installer instructions](installer/README.md) for setup details, custom locations, and restoring backups.
 
+### Manual installation
+
+Copy the files from [translators](translators) into the `translators` subdirectory of your [Zotero data directory](https://www.zotero.org/support/zotero_data#locating_your_zotero_library), replacing existing copies when updating. Close Zotero before copying, then reopen it and restart your browser.
+
+Download [the citation style](styles/nlm-citation-sequence-unnumbered-bibliography.csl), install it via **Zotero Settings > Cite > Styles > +**, and select **NLM/Vancouver (unnumbered bibliography)** in Zotero or your Word document's Zotero preferences. See [Zotero's citation-style instructions](https://www.zotero.org/support/styles).
+
 ## Updates
 
 **2026-11-06**: Added Windows, macOS, and Linux installers for the translators and citation style, with update checks, backups, and optional deactivation of Zotero's bundled UpToDate translator. Translator detection and metadata handling updated, including multi-substance FASS products and UpToDate articles/drug information. BNFC references omit editor information. Micromedex archived because it is no longer used. The unnumbered bibliography style is now based on NLM/Vancouver and renamed `nlm-citation-sequence-unnumbered-bibliography.csl`.

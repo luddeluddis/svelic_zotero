@@ -23,8 +23,6 @@ The translator will save a reference for a selection of databases/publications a
 When using the Vancouver style the reference can appear as follows (using Stockley's Drug Interactions as an example):
 >Preston C, redaktör. Stockley’s Drug Interactions [Internet]. London, UK: Pharmaceutical Press; [citerad 29 juli 2022]. Tillgänglig vid: https://www.medicinescomplete.com/
 
-BNFC references use URL recognition only: the publication title is saved without editor information, a substance name or an update date. The feeding-tube handbook title and unrecognised publication URLs still need correction.
-
 ### Lexicomp
 The translator will save a reference for the drug information service [Lexicomp](https://online.lexi.com/). If a specific database is queried for a specific drug (i.e. a drug name is shown next to the database name in the title/header of the webpage) this information is added to the reference. If this information is not available (e.g. for the databases "Drug interactions", "Trissel's IV Compatibility") a more generic reference will be created. If information about the time of the last monograph update is available/loaded, this information will also be included in the reference.
 

@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-28 12:11:02"
+	"lastUpdated": "2026-11-06 12:00:00"
 }
 
 // Paste into the Code tab of the existing FASS translator.
-// Keep the existing translator metadata (including its ID and target).
+// Supports both the product summary and FASS-text pages.
 function detectWeb(doc, url) {
-	if (/\/product\/\d+\/smpc(?:[/?#]|$)/.test(url)) {
+	if (/\/product\/\d+\/(?:smpc|fass-text)(?:[/?#]|$)/.test(url)) {
 		return "journalArticle";
 	}
 }
@@ -26,7 +26,7 @@ function doWeb(doc, url) {
 	// FASS displays "Product name®, form and strength" in the page heading.
 	var heading = doc.querySelector("h1");
 	var headingText = heading ? ZU.trimInternal(heading.textContent) : "";
-	var pageTitle = doc.title.match(/^(.+?)\s+\([^)]*\)\s*•\s*Produktresumé(?:\s|$)/);
+	var pageTitle = doc.title.match(/^(.+?)\s+\([^)]*\)\s*•\s*(?:Produktresumé|FASS[ -]text)(?:\s|$)/);
 	var handelsnamn = headingText ? headingText.split(",")[0] : (pageTitle ? pageTitle[1] : "");
 	handelsnamn = ZU.trimInternal(handelsnamn.replace(/[®™]/g, ""));
 
@@ -62,11 +62,21 @@ function doWeb(doc, url) {
 	}
 
 	var dateElement = doc.querySelector("#revision-date-section-content > p:nth-child(1)");
-	if (dateElement) {
+	if (/\/fass-text(?:[/?#]|$)/.test(url)) {
+		// The label and value can be split across inline elements.
+		for (var paragraph of doc.querySelectorAll("p")) {
+			var dateMatch = ZU.trimInternal(paragraph.textContent).match(/^Texten är baserad på produktresumé:\s*(.+)$/i);
+			if (dateMatch) {
+				item.date = dateMatch[1].replace(/\.$/, "").trim();
+				break;
+			}
+		}
+	}
+	else if (dateElement) {
 		item.date = ZU.trimInternal(dateElement.textContent);
 	}
 
-	item.url = "https://www.fass.se"; // The specific SPC URL is in the attachment.
+	item.url = "https://www.fass.se"; // The specific page URL is in the attachment.
 	item.publisher = "Läkemedelsverket";
 	item.place = "Uppsala";
 	item.attachments = [{

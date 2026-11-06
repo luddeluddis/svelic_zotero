@@ -65,6 +65,15 @@ The previous customization that displays the full publication date for webpages 
 Install the updated CSL file and select **NLM/Vancouver (unnumbered bibliography)** in Zotero or the Word document's Zotero preferences. The file is [nlm-citation-sequence-unnumbered-bibliography.csl](styles/nlm-citation-sequence-unnumbered-bibliography.csl). The old custom style had a different internal ID, so Zotero may show both until the older entry is removed.
 
 ## Installation
+
+Install Zotero first, then download the installer for your operating system to add or update this repository's translators and citation style:
+
+- **Windows:** [Download the `.bat` installer](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.bat) and double-click it.
+- **macOS:** [Download the `.command` installer](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.command), make it executable, and run it as described [below](#macos-and-linux-installers).
+- **Linux:** [Download the `.sh` installer](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.sh) and run `bash ~/Downloads/install-translators-and-style.sh`.
+
+The installers skip unchanged files, back up replaced files, and ask whether to disable Zotero's bundled UpToDate translator (default: Yes). This repository's `UpToDate_article.js` stays enabled. After installation, select **NLM/Vancouver (unnumbered bibliography)** in Zotero or your Word document's Zotero preferences.
+
 ### Windows installer
 
 Download [install-translators-and-style.bat](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.bat) (save the file, then double-click it). Both scripts live in the `installer` directory; they install translators and the citation style into an existing Zotero installation. If Zotero is running, the installer asks you to close it and press Enter to retry; type Q to cancel. The `.bat` launcher runs an adjacent `.ps1` file if present; otherwise it downloads and runs the [PowerShell installer](installer/install-translators-and-style.ps1) from this public repository. Windows PowerShell 5.1, an internet connection, and a writable Zotero data directory are required; administrator access is not needed. The published installer and files are served from `main`.

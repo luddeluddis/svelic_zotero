@@ -9,12 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 14:18:44"
+	"lastUpdated": "2026-11-06 15:00:00"
 }
 
 function detectWeb(doc, url) {
 	// Match the path so query parameters cannot turn a homepage into an article.
 	var path = url.replace(/^https?:\/\/[^/]+/, "").split(/[?#]/)[0];
+	// Search results share the /contents/ prefix with articles.
+	if (/^\/contents\/search(?:\/|$)/.test(path)) {
+		return;
+	}
+
 	if (/^\/drug-interactions(?:\/|$)/.test(path)) {
 		return 'webpage';
 	}

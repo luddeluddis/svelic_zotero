@@ -12,6 +12,7 @@ SCRIPT = ROOT / 'installer/install-translators-and-style.sh'
 BUNDLED_ID = '70dc2609-d6fd-415a-822c-a2c04293cb5a'
 MOCK = '''#!/usr/bin/env python3
 import json, os, pathlib, shutil, sys
+from urllib.parse import unquote
 state_path = pathlib.Path(os.environ['SVELIC_TEST_STATE'])
 state = json.loads(state_path.read_text())
 if pathlib.Path(sys.argv[0]).name == 'pgrep':
@@ -20,7 +21,7 @@ if pathlib.Path(sys.argv[0]).name == 'pgrep':
     state['checks'] = n + 1
     state_path.write_text(json.dumps(state))
     sys.exit(outcomes[min(n, len(outcomes) - 1)])
-url = sys.argv[-1]
+url = unquote(sys.argv[-1])
 output = pathlib.Path(sys.argv[sys.argv.index('--output') + 1])
 state.setdefault('downloads', []).append(url)
 state_path.write_text(json.dumps(state))
@@ -83,7 +84,7 @@ class ShellInstallerTests(unittest.TestCase):
         self.assertNotIn('Disable', result.stdout)
         self.assertEqual(bundled.read_bytes(), before_bundled)
         self.assertFalse(Path(str(bundled) + '.disabled').exists())
-        custom = self.library / 'translators/UpToDate_article.js'
+        custom = self.library / 'translators/UpToDate Article.js'
         metadata = json.JSONDecoder().raw_decode(custom.read_text())[0]
         self.assertEqual(metadata['priority'], 50)
         self.assertLess(metadata['priority'], json.loads(bundled.read_text())['priority'])
@@ -111,7 +112,7 @@ class ShellInstallerTests(unittest.TestCase):
     def test_does_not_scan_existing_translators(self):
         bundled = self.bundled()
         custom_named_legacy = bundled.parent / 'UpToDate.js'
-        shutil.copyfile(ROOT / 'translators/UpToDate_article.js', custom_named_legacy)
+        shutil.copyfile(ROOT / 'translators/UpToDate Article.js', custom_named_legacy)
         for number in range(300):
             (bundled.parent / f'Unrelated-{number}.js').write_text('Must not be opened')
         # Track actual header reads, including the directory each file belongs to.
@@ -128,9 +129,24 @@ class ShellInstallerTests(unittest.TestCase):
         self.assertEqual(installed_reads, [])
         self.assertNotIn('Checking metadata headers for a renamed copy', result.stdout)
         self.assertTrue(custom_named_legacy.exists())
-        self.assertTrue((bundled.parent / 'UpToDate_article.js').exists())
+        self.assertTrue((bundled.parent / 'UpToDate Article.js').exists())
         self.assertTrue(bundled.exists())
         self.assertFalse(Path(str(bundled) + '.disabled').exists())
+
+    def test_previous_filename_is_backed_up_only_for_matching_id(self):
+        legacy = self.library / 'translators/UpToDate_article.js'
+        legacy.parent.mkdir()
+        original = (ROOT / 'translators/UpToDate Article.js').read_bytes()
+        legacy.write_bytes(original)
+        self.run_installer()
+        self.assertFalse(legacy.exists())
+        backups = list((self.library / 'svelic-installer-backups').glob('*/translators/UpToDate_article.js'))
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(backups[0].read_bytes(), original)
+        self.assertTrue((legacy.parent / 'UpToDate Article.js').exists())
+        legacy.write_text('{"translatorID": "unrelated"}')
+        self.run_installer()
+        self.assertEqual(legacy.read_text(), '{"translatorID": "unrelated"}')
 
     def test_style_and_translator_updates_back_up_originals(self):
         self.run_installer()
@@ -149,7 +165,7 @@ class ShellInstallerTests(unittest.TestCase):
         bundled = self.bundled()
         style = 'nlm-citation-sequence-unnumbered-bibliography.csl'
         for option, suffix in [('SVELIC_TEST_FAIL_FILE', style), ('SVELIC_TEST_INVALID', style),
-                               ('SVELIC_TEST_INVALID', 'UpToDate_article.js')]:
+                               ('SVELIC_TEST_INVALID', 'UpToDate Article.js')]:
             with self.subTest(option=option, suffix=suffix):
                 self.env[option] = suffix
                 self.run_installer(success=False)
@@ -166,7 +182,7 @@ class ShellInstallerTests(unittest.TestCase):
         self.state.write_text('{}')
         result = self.run_installer(answers='\n', processes=[0, 1, 1])
         self.assertIn('press Enter to retry', result.stdout)
-        self.assertTrue((self.library / 'translators/UpToDate_article.js').exists())
+        self.assertTrue((self.library / 'translators/UpToDate Article.js').exists())
 
     def test_zotero_opened_during_download(self):
         result = self.run_installer(answers='q\n', processes=[1, 0])

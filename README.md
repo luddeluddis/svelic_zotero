@@ -39,7 +39,7 @@ When using the Vancouver style the reference may appear as follows:
 >RELIS database 2022. Finns det risker för fortsatt hemolys vid användning av olika 5-ASA-preparat? Id.nr. 1017, LUPP. (https://svelic.se/utredning/?id=11-1017).
 
 
-### UpToDate_article
+### UpToDate Article
 The translator saves the loaded [UpToDate](https://www.uptodate.com/) clinical article or drug-information monograph as a book section. Clinical articles use **UpToDate** as the book title; drug-information pages use **UpToDate Lexidrug**. Authors, editors and the last-update date are extracted when available, and a link to the specific article is saved. The UpToDate Drug Interactions tool receives a generic reference titled **Lexicomp® Drug Interactions**. The translator uses priority 50, ahead of Zotero's bundled **UpToDate References** translator at priority 100, so both can remain installed. Let the page finish loading before saving; a reload may be needed if it is not recognised.
 
 When using the Vancouver style the reference may appear as follows:
@@ -72,7 +72,9 @@ Install Zotero first, then download the installer for your operating system to a
 - **macOS:** [Download the `.command` installer](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.command), make it executable, and run it as described in the [macOS instructions](installer/README.md#macos-and-linux-installers).
 - **Linux:** [Download the `.sh` installer](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.sh) and run `bash ~/Downloads/install-translators-and-style.sh`.
 
-The installers skip unchanged files and back up replaced files. This repository's `UpToDate_article.js` takes precedence over Zotero's bundled references translator on article pages, so both can remain installed. After installation, select **NLM/Vancouver (unnumbered bibliography)** in Zotero or your Word document's Zotero preferences.
+The installers skip unchanged files and back up replaced files. This repository's `UpToDate Article.js` takes precedence over Zotero's bundled references translator on article pages, so both can remain installed. After installation, select **NLM/Vancouver (unnumbered bibliography)** in Zotero or your Word document's Zotero preferences.
+
+When updating from `UpToDate_article.js`, the installers back up the old file and install `UpToDate Article.js` with the same translator ID.
 
 See the [installer instructions](installer/README.md) for setup details, custom locations, and restoring backups.
 

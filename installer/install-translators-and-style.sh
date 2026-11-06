@@ -45,7 +45,7 @@ expected_translator_id() {
         translators/Lexicomp.js) printf '%s' 'bf16028e-e50c-404b-9368-077c02bb4152' ;;
         translators/MedicinesComplete.js) printf '%s' '7111b34c-127b-43aa-a7ac-fecd449041c4' ;;
         translators/SVELIC.js) printf '%s' '9a8e9820-46b5-455e-9edb-89491163fd50' ;;
-        translators/UpToDate_article.js) printf '%s' '4af8c4da-cf3d-4ec2-989f-15d4d0723bf1' ;;
+        'translators/UpToDate Article.js') printf '%s' '4af8c4da-cf3d-4ec2-989f-15d4d0723bf1' ;;
     esac
 }
 
@@ -64,7 +64,7 @@ install_zotero_files() {
         'translators/Lexicomp.js'
         'translators/MedicinesComplete.js'
         'translators/SVELIC.js'
-        'translators/UpToDate_article.js'
+        'translators/UpToDate Article.js'
         'styles/nlm-citation-sequence-unnumbered-bibliography.csl'
     )
     while [ "$#" -gt 0 ]; do
@@ -112,7 +112,7 @@ install_zotero_files() {
     # Stage and check all downloads before changing the installed files.
     for file in "${files[@]}"; do
         mkdir -p -- "$stage/$(dirname -- "$file")"
-        fetch_file "$base/$file" "$stage/$file"
+        fetch_file "$base/${file// /%20}" "$stage/$file"
         case "$file" in
             *.js)
                 [ "$(translator_id "$stage/$file")" = "$(expected_translator_id "$file")" ] || installer_error "Unexpected translator ID: $file"
@@ -153,6 +153,17 @@ install_zotero_files() {
         pending=''
         printf 'Installed: %s\n' "$file"
     done
+    # Retire the previous filename only when it belongs to this translator.
+    local legacy="$data_directory/translators/UpToDate_article.js"
+    if [ -f "$legacy" ] && [ "$(translator_id "$legacy")" = '4af8c4da-cf3d-4ec2-989f-15d4d0723bf1' ]; then
+        if [ -z "$backup" ]; then
+            mkdir -p -- "$data_directory/svelic-installer-backups"
+            backup=$(mktemp -d "$data_directory/svelic-installer-backups/$(date +%Y%m%d-%H%M%S)-XXXXXX")
+        fi
+        mkdir -p -- "$backup/translators"
+        mv -- "$legacy" "$backup/translators/UpToDate_article.js"
+        printf 'Backed up previous filename: UpToDate_article.js\n'
+    fi
     if [ -n "$backup" ]; then printf 'Previous files backed up to: %s\n' "$backup"; fi
     printf 'Finished. Source commit: %s\n' "$commit"
     printf 'Open Zotero, restart your browser, and reload the article page.\n'

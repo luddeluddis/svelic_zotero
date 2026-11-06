@@ -21,7 +21,7 @@ function Invoke-RestMethod { param($Uri, $Headers, $TimeoutSec) return @{ sha = 
 function Invoke-WebRequest {
     param([switch]$UseBasicParsing, $Uri, $OutFile, $TimeoutSec, $Headers)
     if ($script:failDownload) { throw 'Simulated network failure' }
-    $relative = ($Uri -split '/[a-f0-9]{40}/', 2)[1]
+    $relative = ([Uri]::UnescapeDataString($Uri) -split '/[a-f0-9]{40}/', 2)[1]
     Copy-Item -LiteralPath (Join-Path $sourceRoot $relative) -Destination $OutFile
     if ($script:invalidStyle -and $relative.EndsWith('.csl')) { [IO.File]::WriteAllText($OutFile, '<html>Not a CSL file</html>') }
 }
@@ -39,7 +39,7 @@ try {
     Install-ZoteroFiles
     Assert (Test-Path -LiteralPath $bundled) 'Bundled translator was removed'
     Assert (-not (Test-Path -LiteralPath "$bundled.disabled")) 'Bundled translator was renamed'
-    $custom = Join-Path $DataDirectory 'translators/UpToDate_article.js'
+    $custom = Join-Path $DataDirectory 'translators/UpToDate Article.js'
     Assert ((Get-TranslatorMetadata $custom).translatorID -eq '4af8c4da-cf3d-4ec2-989f-15d4d0723bf1') 'Custom translator missing or disabled'
     Assert ((Get-TranslatorMetadata $custom).priority -eq 50) 'Custom translator priority was not installed'
     Assert ((Get-TranslatorMetadata $custom).priority -lt (Get-TranslatorMetadata $bundled).priority) 'Custom translator does not take precedence'
@@ -53,12 +53,22 @@ try {
     Assert ((Get-Item -LiteralPath $style).LastWriteTimeUtc -eq $firstStyleTime) 'Unchanged style was rewritten'
     Assert (-not (Test-Path -LiteralPath (Join-Path $DataDirectory 'svelic-installer-backups'))) 'Unchanged files were backed up'
 
+    $legacy = Join-Path $DataDirectory 'translators/UpToDate_article.js'
+    Copy-Item -LiteralPath $custom -Destination $legacy
+    Install-ZoteroFiles
+    Assert (-not (Test-Path -LiteralPath $legacy)) 'Previous filename remained active'
+    $legacyBackups = @(Get-ChildItem -LiteralPath (Join-Path $DataDirectory 'svelic-installer-backups') -Filter 'UpToDate_article.js' -Recurse -File)
+    Assert ($legacyBackups.Count -eq 1) 'Previous filename was not backed up'
+    [IO.File]::WriteAllText($legacy, '{"translatorID":"unrelated","label":"Other"}')
+    Install-ZoteroFiles
+    Assert (Test-Path -LiteralPath $legacy) 'Unrelated translator was moved'
+
     # Modified files must be replaced and the previous contents backed up.
     [IO.File]::WriteAllText($custom, 'old custom translator')
     Install-ZoteroFiles
     $backups = @(Get-ChildItem -LiteralPath (Join-Path $DataDirectory 'svelic-installer-backups') -Recurse -File)
-    Assert ($backups.Count -eq 1) 'Expected one backup'
-    Assert ([IO.File]::ReadAllText($backups[0].FullName) -eq 'old custom translator') 'Backup content changed'
+    Assert ($backups.Count -eq 2) 'Expected migration and replacement backups'
+    Assert ([IO.File]::ReadAllText(($backups | Where-Object Name -eq 'UpToDate Article.js').FullName) -eq 'old custom translator') 'Backup content changed'
     Assert ((Get-TranslatorMetadata $custom).label -eq 'UpToDate article') 'Custom update failed'
 
     $renamed = Write-Bundled 'Renamed bundled.js'

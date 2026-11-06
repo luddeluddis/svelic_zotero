@@ -73,7 +73,7 @@ function Install-ZoteroFiles {
         'translators/Lexicomp.js',
         'translators/MedicinesComplete.js',
         'translators/SVELIC.js',
-        'translators/UpToDate_article.js',
+        'translators/UpToDate Article.js',
         'styles/nlm-citation-sequence-unnumbered-bibliography.csl'
     )
     $stage = Join-Path ([IO.Path]::GetTempPath()) ('svelic-zotero-' + [guid]::NewGuid().ToString('N'))
@@ -84,7 +84,7 @@ function Install-ZoteroFiles {
         foreach ($file in $files) {
             $download = Join-Path $stage $file
             New-Item -ItemType Directory -Path (Split-Path $download) -Force | Out-Null
-            Invoke-WebRequest -UseBasicParsing -Uri "$base/$file" -OutFile $download -TimeoutSec 60 -Headers $headers
+            Invoke-WebRequest -UseBasicParsing -Uri "$base/$($file.Replace(' ', '%20'))" -OutFile $download -TimeoutSec 60 -Headers $headers
             if ($file.EndsWith('.js')) { $null = Get-TranslatorMetadata $download }
             else {
                 $xml = New-Object System.Xml.XmlDocument
@@ -97,7 +97,7 @@ function Install-ZoteroFiles {
         }
         # Verify the custom translator before replacing the installed copy.
         $customID = '4af8c4da-cf3d-4ec2-989f-15d4d0723bf1'
-        $custom = Get-TranslatorMetadata (Join-Path $stage 'translators/UpToDate_article.js')
+        $custom = Get-TranslatorMetadata (Join-Path $stage 'translators/UpToDate Article.js')
         if ($custom.translatorID -ne $customID) { throw 'Unexpected ID for the custom UpToDate translator.' }
         if (-not (Wait-ZoteroClosed)) { return }
         foreach ($file in $files) {
@@ -122,6 +122,18 @@ function Install-ZoteroFiles {
             }
             finally { if (Test-Path -LiteralPath $pending) { Remove-Item -LiteralPath $pending } }
             Write-Host "Installed: $file"
+        }
+        # Retire the previous filename only when it belongs to this translator.
+        $legacy = Join-Path $DataDirectory 'translators/UpToDate_article.js'
+        if (Test-Path -LiteralPath $legacy -PathType Leaf) {
+            $legacyID = $null
+            try { $legacyID = (Get-TranslatorMetadata $legacy).translatorID } catch { }
+            if ($legacyID -eq $customID) {
+                $savedLegacy = Join-Path $backup 'translators/UpToDate_article.js'
+                New-Item -ItemType Directory -Path (Split-Path $savedLegacy) -Force | Out-Null
+                Move-Item -LiteralPath $legacy -Destination $savedLegacy
+                Write-Host 'Backed up previous filename: UpToDate_article.js'
+            }
         }
         if (Test-Path -LiteralPath $backup) { Write-Host "Previous files backed up to: $backup" }
         Write-Host "Finished. Source commit: $($commit.sha)"

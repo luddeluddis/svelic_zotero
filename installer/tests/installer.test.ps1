@@ -105,6 +105,37 @@ try {
     try { Install-ZoteroFiles } catch { $failed = $true }
     Assert $failed 'Download failure was ignored'
     Assert ((Get-FileHash -LiteralPath $custom).Hash -eq $before) 'Failed download changed installed translator'
-    Write-Host 'PASS: install, default Yes, opt-out, ID matching, custom protection, repeat runs, backups, running Zotero, download failure.'
+    # A normal installation must not open unrelated translator files.
+    $fastDirectory = Join-Path $testRoot 'Many translators'
+    New-Item -ItemType Directory -Path $fastDirectory | Out-Null
+    for ($i = 0; $i -lt 300; $i++) {
+        [IO.File]::WriteAllText((Join-Path $fastDirectory "Unrelated-$i.js"), 'Not metadata; must not be opened on the fast path')
+    }
+    $known = Join-Path $fastDirectory 'UpToDate References.js'
+    [IO.File]::WriteAllText($known, "{`n`"translatorID`":`"70dc2609-d6fd-415a-822c-a2c04293cb5a`",`n`"label`":`"UpToDate References`"`n}`n" + ('x' * 1000000))
+    # Even a misleading filename containing the custom translator must stay enabled.
+    Copy-Item -LiteralPath (Join-Path $sourceRoot 'translators/UpToDate_article.js') -Destination (Join-Path $fastDirectory 'UpToDate.js')
+    $script:originalHeaderReader = ${function:Get-TranslatorHeader}
+    $script:headersRead = New-Object 'Collections.Generic.List[string]'
+    function Get-TranslatorHeader([string]$Path) {
+        $script:headersRead.Add($Path)
+        & $script:originalHeaderReader $Path
+    }
+    $found = @(Find-BundledUpToDate $fastDirectory)
+    Assert ($found.Count -eq 1 -and $found[0] -eq $known) 'Known filename did not identify only the bundled ID'
+    Assert ($script:headersRead.Count -eq 2) 'Fast path opened unrelated translators'
+    $header = Get-TranslatorHeader $known
+    Assert ($header.Length -lt 1000) 'Reader returned translator code instead of only metadata'
+
+    # Fallback still finds a renamed bundled file and ignores IDs occurring in code.
+    $fallbackDirectory = Join-Path $testRoot 'Renamed translator search'
+    New-Item -ItemType Directory -Path $fallbackDirectory | Out-Null
+    $renamed = Join-Path $fallbackDirectory 'Renamed.js'
+    Copy-Item -LiteralPath $known -Destination $renamed
+    $decoy = Join-Path $fallbackDirectory 'Decoy.js'
+    [IO.File]::WriteAllText($decoy, "{`n`"translatorID`":`"different-id`",`n`"label`":`"Other translator`"`n}`n// 70dc2609-d6fd-415a-822c-a2c04293cb5a")
+    $found = @(Find-BundledUpToDate $fallbackDirectory)
+    Assert ($found.Count -eq 1 -and $found[0] -eq $renamed) 'Fallback matched translator code or missed renamed bundled translator'
+    Write-Host 'PASS: install, default Yes, opt-out, ID matching, custom protection, repeat runs, backups, running Zotero, download failure, fast lookup and bounded metadata reads.'
 }
 finally { Remove-Item -LiteralPath $testRoot -Recurse -Force }

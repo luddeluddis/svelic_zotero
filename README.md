@@ -78,7 +78,7 @@ See the [installer instructions](installer/README.md) for setup details, custom 
 
 ## Updates
 
-**2026-11-06**: Translator detection and metadata handling updated, including multi-substance FASS products and UpToDate articles/drug information. BNFC references omit editor information. Micromedex archived because it is no longer used. The unnumbered bibliography style is now based on NLM/Vancouver and renamed `nlm-citation-sequence-unnumbered-bibliography.csl`.
+**2026-11-06**: Added Windows, macOS, and Linux installers for the translators and citation style, with update checks, backups, and optional deactivation of Zotero's bundled UpToDate translator. Translator detection and metadata handling updated, including multi-substance FASS products and UpToDate articles/drug information. BNFC references omit editor information. Micromedex archived because it is no longer used. The unnumbered bibliography style is now based on NLM/Vancouver and renamed `nlm-citation-sequence-unnumbered-bibliography.csl`.
 
 **2023-08-18**: UpToDate translator updated (last update date not retrieved).
 **2022-08-01**: FASS, SVELIC and UpToDate translators updated. New translators added: Janusmed, MedicinesComplete, Micromedex and Lexicomp. Vancouver_unnumbered_bibliography updated.

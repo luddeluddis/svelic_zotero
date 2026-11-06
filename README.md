@@ -1,5 +1,5 @@
 # LIC and Zotero
-This repository contains Zotero-related files developed to simplify creation and management of citations within drug information centres in Sweden. The reference examples below are illustrative; formatting depends on the selected citation style and language.
+This repository contains Zotero-related files developed to simplify creation and management of citations within drug information centres in Sweden (LIC, Läkemedelsinformationscentral). The reference examples below are illustrative; formatting depends on the selected citation style and language.
 
 ## Zotero Translators
 

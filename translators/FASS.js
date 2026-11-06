@@ -12,9 +12,10 @@
 	"lastUpdated": "2025-11-28 12:11:02"
 }
 
+// Paste into the Code tab of the existing FASS translator.
+// Keep the existing translator metadata (including its ID and target).
 function detectWeb(doc, url) {
-	// Regex matches: /product/, followed by digits, followed by /smpc
-	if (url.match(/\/product\/\d+\/smpc/)) {
+	if (/\/product\/\d+\/smpc(?:[/?#]|$)/.test(url)) {
 		return "journalArticle";
 	}
 }
@@ -22,110 +23,59 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var item = new Zotero.Item("journalArticle");
 
-	// --- Handelsnamn ---
-	// Take everything up to the first comma
-	// Using CSS selector
-	var handelsnamn = "";
-	var titleElement = doc.querySelector("h1.break-words");
-	if (titleElement) {
-		var fullTitle = titleElement.textContent;
-		// Split by comma and take the first part
-		if (fullTitle.includes(",")) {
-			handelsnamn = fullTitle.split(",")[0];
-		} else {
-			handelsnamn = fullTitle;
+	// FASS displays "Product name®, form and strength" in the page heading.
+	var heading = doc.querySelector("h1");
+	var headingText = heading ? ZU.trimInternal(heading.textContent) : "";
+	var pageTitle = doc.title.match(/^(.+?)\s+\([^)]*\)\s*•\s*Produktresumé(?:\s|$)/);
+	var handelsnamn = headingText ? headingText.split(",")[0] : (pageTitle ? pageTitle[1] : "");
+	handelsnamn = ZU.trimInternal(handelsnamn.replace(/[®™]/g, ""));
+
+	// Both desktop links and the mobile menu can be present in the same page.
+	var substanceHeading = Array.from(doc.querySelectorAll("h2, h3, h4, h5, h6")).find(function (element) {
+		return /^(Substans|Substanser(?: i alfabetisk ordning)?)$/.test(ZU.trimInternal(element.textContent));
+	});
+	var substanser = new Set();
+	if (substanceHeading) {
+		var links = substanceHeading.parentElement.querySelectorAll('a[href*="/substance/"]');
+		for (var link of links) {
+			var substans = ZU.trimInternal(link.textContent).toLowerCase();
+			if (substans) {
+				substanser.add(substans);
+			}
 		}
 	}
-	handelsnamn = ZU.trimInternal(handelsnamn);
 
-	// --- Generika ---
-	// Using CSS Selector.
-	var generikaSelector = ".md\\:max-w-\\[60ch\\] > a:nth-child(1) > span:nth-child(1) > span:nth-child(1)";
-	var generikaElement = doc.querySelector(generikaSelector);
-	
-	// Fallback to XPath if CSS fails (as Tailwind classes can be brittle)
-	var generika = "";
-	if (generikaElement) {
-		generika = generikaElement.textContent;
-	} else {
-		generika = ZU.xpathText(doc, '/html/body/div[5]/div[4]/div[1]/div[2]/div[4]/div[3]/div/div/a/span/span[1]');
+	var namn = handelsnamn;
+	if (substanser.size) {
+		namn += (namn ? " " : "") + "(" + Array.from(substanser).join(",") + ")";
 	}
-	generika = ZU.trimInternal(generika);
+	item.title = namn + ", Produktresumé (SPC)";
 
-	// --- Bolag ---
-	// Take everything up to the first comma
-	// Using CSS Selector
-	var bolag = "";
 	var bolagElement = doc.querySelector(".text-button-sm");
-	if (bolagElement) {
-		var fullBolag = bolagElement.textContent;
-		// Split by comma and take the first part
-		if (fullBolag.includes(",")) {
-			bolag = fullBolag.split(",")[0];
-		} else {
-			bolag = fullBolag;
-		}
-	}
-	bolag = ZU.trimInternal(bolag);
-
-	// --- Uppdaterat (Date) ---
-	// Using CSS Selector
-	var uppdaterat = "";
-	var dateElement = doc.querySelector("#revision-date-section-content > p:nth-child(1)");
-	if (dateElement) {
-		uppdaterat = dateElement.textContent;
-	}
-	uppdaterat = ZU.trimInternal(uppdaterat);
-
-	// --- Debugging ---
-	Zotero.debug("FASS Scraper Data -- Namn: " + handelsnamn + " | Generika: " + generika + " | Bolag: " + bolag + " | Datum: " + uppdaterat);
-
-	// --- Populate Item ---
-	
-	// Set Title: Namn (Generika), Produktresumé (SPC)
-	var titleString = handelsnamn;
-	if (generika) {
-		titleString += " (" + generika.toLowerCase() + ")";
-	}
-	titleString += ", Produktresumé (SPC)";
-	item.title = titleString;
-
-	// Set Author (Company)
+	var bolag = bolagElement ? ZU.trimInternal(bolagElement.textContent.split(",")[0]) : "";
 	if (bolag) {
 		item.creators.push({
 			lastName: bolag,
-			creatorType: "author", 
-			fieldMode: 1 // 1 indicates institutional author (single field)
+			creatorType: "author",
+			fieldMode: 1
 		});
 	}
 
-	// Set Date
-	if (uppdaterat) {
-		item.date = uppdaterat;
+	var dateElement = doc.querySelector("#revision-date-section-content > p:nth-child(1)");
+	if (dateElement) {
+		item.date = ZU.trimInternal(dateElement.textContent);
 	}
 
-	// Static Fields
-	item.url = "https://www.fass.se"; // specific link is in attachment
-	item.publisher = "Läkemedelsverket";  
-	item.place = "Uppsala"; 
-
-	// Attachments
+	item.url = "https://www.fass.se"; // The specific SPC URL is in the attachment.
+	item.publisher = "Läkemedelsverket";
+	item.place = "Uppsala";
 	item.attachments = [{
 		url: url,
-		title: "FASS - " + handelsnamn + " (" + generika.toLowerCase() + ")",
+		title: "FASS - " + namn,
 		mimeType: "text/html",
 		snapshot: false
 	}];
 
+	Zotero.debug("FASS Scraper Data -- Titel: " + item.title + " | Bolag: " + bolag + " | Datum: " + (item.date || ""));
 	item.complete();
 }
-
-/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "https://fass.se/health/product/20080312000022/smpc",
-		"items": "multiple"
-	}
-]
-/** END TEST CASES **/

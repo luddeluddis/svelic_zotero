@@ -108,6 +108,41 @@ class ShellInstallerTests(unittest.TestCase):
         self.run_installer('--disable-default-uptodate', 'yes')
         self.assertEqual(len(list(bundled.parent.glob(bundled.name + '.disabled*'))), 2)
 
+    def test_known_filenames_skip_unrelated_translators(self):
+        bundled = self.bundled()
+        custom_named_legacy = bundled.parent / 'UpToDate.js'
+        shutil.copyfile(ROOT / 'translators/UpToDate_article.js', custom_named_legacy)
+        for number in range(300):
+            (bundled.parent / f'Unrelated-{number}.js').write_text('Must not be opened')
+        # Track actual header reads, including the directory each file belongs to.
+        log = self.directory / 'header-reads.jsonl'
+        real_awk = shutil.which('awk')
+        (self.bin / 'awk').write_text(
+            '#!/usr/bin/env python3\nimport json, os, sys\n'
+            f'with open({str(log)!r}, "a") as output: output.write(json.dumps(sys.argv[-1]) + "\\n")\n'
+            f'os.execv({real_awk!r}, [{real_awk!r}] + sys.argv[1:])\n')
+        (self.bin / 'awk').chmod(0o755)
+        result = self.run_installer('--disable-default-uptodate', 'yes')
+        installed_reads = [Path(json.loads(line)) for line in log.read_text().splitlines()
+                           if Path(json.loads(line)).parent == bundled.parent]
+        self.assertEqual(set(installed_reads), {bundled, custom_named_legacy})
+        self.assertNotIn('Checking metadata headers for a renamed copy', result.stdout)
+        self.assertTrue(custom_named_legacy.exists())
+        self.assertTrue((bundled.parent / 'UpToDate_article.js').exists())
+        self.assertTrue(Path(str(bundled) + '.disabled').exists())
+
+    def test_fallback_reports_progress_and_ignores_id_in_code(self):
+        bundled = self.bundled('Renamed.js')
+        for number in range(100):
+            (bundled.parent / f'Other-{number}.js').write_text(
+                json.dumps({'translatorID': 'unrelated-id', 'label': 'Other'}, indent=2)
+                + '\n// ' + BUNDLED_ID)
+        result = self.run_installer('--disable-default-uptodate', 'yes')
+        self.assertIn('Checking metadata headers for a renamed copy', result.stdout)
+        self.assertIn('Checked 100 translator metadata headers', result.stdout)
+        self.assertTrue(Path(str(bundled) + '.disabled').exists())
+        self.assertEqual(len(list(bundled.parent.glob('Other-*.js'))), 100)
+
     def test_style_and_translator_updates_back_up_originals(self):
         self.run_installer('--disable-default-uptodate', 'no')
         paths = ['translators/FASS.js', 'styles/nlm-citation-sequence-unnumbered-bibliography.csl']

@@ -15,6 +15,33 @@ translator_id() {
     ' "$1"
 }
 
+find_bundled_uptodate() {
+    local directory="$1" candidate checked=0
+    bundled_paths=()
+    bundled_found=0
+    printf 'Checking for Zotero bundled UpToDate translator...\n'
+    for candidate in "$directory/UpToDate References.js" "$directory/UpToDate.js"; do
+        [ -f "$candidate" ] || continue
+        if [ "$(translator_id "$candidate")" = '70dc2609-d6fd-415a-822c-a2c04293cb5a' ]; then
+            bundled_paths[$bundled_found]="$candidate"
+            bundled_found=$((bundled_found + 1))
+        fi
+    done
+    # Avoid opening unrelated translators when a usual filename identifies the bundled ID.
+    if [ "$bundled_found" -gt 0 ]; then return 0; fi
+    printf 'No bundled translator at its usual filenames. Checking metadata headers for a renamed copy...\n'
+    for candidate in "$directory/"*.js; do
+        [ -f "$candidate" ] || continue
+        case "${candidate##*/}" in 'UpToDate References.js'|'UpToDate.js') continue ;; esac
+        checked=$((checked + 1))
+        if [ $((checked % 100)) -eq 0 ]; then printf 'Checked %s translator metadata headers...\n' "$checked"; fi
+        if [ "$(translator_id "$candidate")" = '70dc2609-d6fd-415a-822c-a2c04293cb5a' ]; then
+            bundled_paths[$bundled_found]="$candidate"
+            bundled_found=$((bundled_found + 1))
+        fi
+    done
+}
+
 wait_zotero_closed() {
     local answer status
     while true; do
@@ -57,7 +84,7 @@ installer_cleanup() {
 install_zotero_files() {
     local data_directory="$HOME/Zotero" repository='luddeluddis/svelic_zotero' ref='main'
     local disable='ask' answer tool encoded_ref commit base file destination saved candidate disabled status
-    local backup='' bundled_count=0
+    local backup='' bundled_count=0 bundled_index=0
     local files=(
         'translators/FASS.js'
         'translators/Janusmed.js'
@@ -168,20 +195,18 @@ install_zotero_files() {
         printf 'Installed: %s\n' "$file"
     done
     if [ "$disable" = yes ]; then
-        for candidate in "$data_directory/translators/"*.js; do
-            [ -f "$candidate" ] || continue
-            # Match only the bundled ID. The custom translator has a different ID.
-            if [ "$(translator_id "$candidate")" = '70dc2609-d6fd-415a-822c-a2c04293cb5a' ]; then
-                disabled="$candidate.disabled"
-                if [ -e "$disabled" ]; then
-                    pending=$(mktemp "$candidate.disabled.XXXXXX")
-                    disabled="$pending"
-                fi
-                mv -- "$candidate" "$disabled"
-                pending=''
-                bundled_count=$((bundled_count + 1))
-                printf 'Disabled bundled translator: %s -> %s\n' "${candidate##*/}" "${disabled##*/}"
+        find_bundled_uptodate "$data_directory/translators"
+        for ((bundled_index = 0; bundled_index < bundled_found; bundled_index++)); do
+            candidate="${bundled_paths[$bundled_index]}"
+            disabled="$candidate.disabled"
+            if [ -e "$disabled" ]; then
+                pending=$(mktemp "$candidate.disabled.XXXXXX")
+                disabled="$pending"
             fi
+            mv -- "$candidate" "$disabled"
+            pending=''
+            bundled_count=$((bundled_count + 1))
+            printf 'Disabled bundled translator: %s -> %s\n' "${candidate##*/}" "${disabled##*/}"
         done
         if [ "$bundled_count" -eq 0 ]; then printf 'Bundled UpToDate References translator is absent or already disabled.\n'; fi
     fi

@@ -21,11 +21,23 @@ function Get-TranslatorMetadata([string]$Path) {
     return $metadata
 }
 
+function Wait-ZoteroClosed {
+    while (Get-Process -Name zotero -ErrorAction SilentlyContinue) {
+        Write-Host ''
+        Write-Host 'Zotero is still running. Please close Zotero before continuing.' -ForegroundColor Yellow
+        Write-Host 'The installer needs Zotero closed to update its translators and style.'
+        $answer = Read-Host 'Close Zotero, then press Enter to retry (or type Q to cancel)'
+        if ($answer.Trim() -ieq 'q') {
+            Write-Host 'Installation cancelled. No further files will be changed.'
+            return $false
+        }
+    }
+    return $true
+}
+
 function Install-ZoteroFiles {
     # Never modify files while Zotero is using them.
-    if (Get-Process -Name zotero -ErrorAction SilentlyContinue) {
-        throw 'Close Zotero, then run this installer again.'
-    }
+    if (-not (Wait-ZoteroClosed)) { return }
     while (-not (Test-Path -LiteralPath (Join-Path $DataDirectory 'zotero.sqlite') -PathType Leaf)) {
         Write-Host "No Zotero library found at: $DataDirectory"
         $answer = Read-Host 'Enter the data directory shown in Zotero Settings > Advanced > Files and Folders (blank to cancel)'
@@ -91,7 +103,7 @@ function Install-ZoteroFiles {
                 if ($metadata.translatorID -eq $bundledID) { $bundled += $candidate.FullName }
             }
         }
-        if (Get-Process -Name zotero -ErrorAction SilentlyContinue) { throw 'Zotero was opened during download. Close it and rerun.' }
+        if (-not (Wait-ZoteroClosed)) { return }
         foreach ($file in $files) {
             $download = Join-Path $stage $file
             $destination = Join-Path $DataDirectory $file
@@ -136,5 +148,5 @@ function Install-ZoteroFiles {
 # Dot-sourcing exposes the functions for isolated tests without running the installer.
 if ($MyInvocation.InvocationName -ne '.') {
     try { Install-ZoteroFiles }
-    catch { Write-Error $_; exit 1 }
+    catch { Write-Host ('Installation failed: ' + $_.Exception.Message) -ForegroundColor Red; exit 1 }
 }

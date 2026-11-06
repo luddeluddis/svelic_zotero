@@ -67,7 +67,7 @@ Install the updated CSL file and select **NLM/Vancouver (unnumbered bibliography
 ## Installation
 ### Windows installer
 
-Download [install-translators-and-style.bat](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.bat) (save the file, then double-click it). Both scripts live in the `installer` directory; they install translators and the citation style into an existing Zotero installation. Close Zotero first. The `.bat` launcher runs an adjacent `.ps1` file if present; otherwise it downloads and runs the [PowerShell installer](installer/install-translators-and-style.ps1) from this public repository. Windows PowerShell 5.1, an internet connection, and a writable Zotero data directory are required; administrator access is not needed. The published installer and files are served from `main`.
+Download [install-translators-and-style.bat](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.bat) (save the file, then double-click it). Both scripts live in the `installer` directory; they install translators and the citation style into an existing Zotero installation. If Zotero is running, the installer asks you to close it and press Enter to retry; type Q to cancel. The `.bat` launcher runs an adjacent `.ps1` file if present; otherwise it downloads and runs the [PowerShell installer](installer/install-translators-and-style.ps1) from this public repository. Windows PowerShell 5.1, an internet connection, and a writable Zotero data directory are required; administrator access is not needed. The published installer and files are served from `main`.
 
 The installer:
 

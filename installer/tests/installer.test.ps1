@@ -9,7 +9,14 @@ $script:failDownload = $false
 $script:invalidStyle = $false
 $script:answer = ''
 function Get-Process { param($Name, $ErrorAction) if ($script:running) { return $true } }
-function Read-Host { param($Prompt) return $script:answer }
+$script:closeOnPrompt = $false
+$script:promptCount = 0
+function Read-Host {
+    param($Prompt)
+    $script:promptCount++
+    if ($script:closeOnPrompt) { $script:running = $false }
+    return $script:answer
+}
 function Invoke-RestMethod { param($Uri, $Headers, $TimeoutSec) return @{ sha = ('a' * 40) } }
 function Invoke-WebRequest {
     param([switch]$UseBasicParsing, $Uri, $OutFile, $TimeoutSec, $Headers)
@@ -80,10 +87,18 @@ try {
     Assert ($savedStyles.Count -eq 1) 'Previous style was not backed up'
     Assert ([IO.File]::ReadAllText($savedStyles[0].FullName) -eq 'old local style') 'Style backup content changed'
     $script:running = $true
-    $failed = $false
-    try { Install-ZoteroFiles } catch { $failed = $true }
-    Assert $failed 'Running Zotero was not rejected'
-    $script:running = $false
+    $script:answer = 'q'
+    $before = (Get-FileHash -LiteralPath $custom).Hash
+    Install-ZoteroFiles
+    Assert ((Get-FileHash -LiteralPath $custom).Hash -eq $before) 'Cancellation changed installed files'
+    Assert $script:running 'Installer closed Zotero itself'
+    $script:answer = ''
+    $script:closeOnPrompt = $true
+    $promptsBefore = $script:promptCount
+    Install-ZoteroFiles
+    Assert ($script:promptCount -eq $promptsBefore + 1) 'Running Zotero did not prompt to retry'
+    Assert (-not $script:running) 'Retry did not continue after Zotero closed'
+    $script:closeOnPrompt = $false
     $script:failDownload = $true
     $before = (Get-FileHash -LiteralPath $custom).Hash
     $failed = $false

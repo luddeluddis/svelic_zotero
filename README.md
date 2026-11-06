@@ -55,14 +55,14 @@ Archived because we no longer have access to Micromedex. The translator is prese
 
 ## Styles
 
-#### Vancouver_unnumbered_bibliography
+#### nlm-citation-sequence-unnumbered-bibliography.csl
 This style is based on [NLM/Vancouver: Citing Medicine 2nd edition (citation-sequence)](https://www.zotero.org/styles/nlm-citation-sequence), downloaded on 2026-11-06 from the [CSL styles repository](https://github.com/citation-style-language/styles/blob/e1273bfb04965d278954ef7f55a4ef8a9c364bf2/nlm-citation-sequence.csl). It appears in Zotero as **NLM/Vancouver (unnumbered bibliography)**.
 
 Bibliography entries have no leading numbers or number-alignment column. Apply Word's own numbered-list formatting when numbers are needed; this makes them easy to remove before transferring references to RELIS. Numeric in-text citations remain `(1)`, `(2)`, etc., and references remain in citation order.
 
 The previous customization that displays the full publication date for webpages and other default item types is preserved. Upstream author attribution and the CC BY-SA 3.0 license are retained. The custom style has its own title and ID so updates to the standard NLM style do not overwrite it.
 
-Install the updated CSL file and select **NLM/Vancouver (unnumbered bibliography)** in Zotero or the Word document's Zotero preferences. The filename is unchanged; the old custom style had a different internal ID, so Zotero may show both until the older entry is removed.
+Install the updated CSL file and select **NLM/Vancouver (unnumbered bibliography)** in Zotero or the Word document's Zotero preferences. The file is named `nlm-citation-sequence-unnumbered-bibliography.csl`. The old custom style had a different internal ID, so Zotero may show both until the older entry is removed.
 
 ## Installation
 Zotero translators should be placed in the “translators” subdirectory of the [Zotero data directory](https://www.zotero.org/support/zotero_data#locating_your_zotero_library "/support/zotero_data#locating_your_zotero_library").

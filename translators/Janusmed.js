@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-26 14:00:19"
+	"lastUpdated": "2026-11-06 12:36:20"
 }
 
 function detectWeb(doc, url)	{
 	if (url.includes('janusmed')){
-		return 'journalArticle';
+		return 'webpage';
 	}
 }   
 

@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-26 14:00:31"
+	"lastUpdated": "2026-11-06 12:36:20"
 }
 
 function detectWeb(doc, url)	{
 	if (url.includes('action')){
-		return 'journalArticle';
+		return 'webpage';
 	}
 } 
 
@@ -57,7 +57,7 @@ function doWeb(doc, url) {
 	// or if no specific database is discernible
 	else {
 		item.title = "Lexicomp® Online"; 
-		item.creators = ""
+		item.creators = [];
 	}
 	
 	item.complete();

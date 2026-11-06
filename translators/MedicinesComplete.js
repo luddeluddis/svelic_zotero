@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-29 14:05:44"
+	"lastUpdated": "2026-11-06 12:36:20"
 }
 
 function detectWeb(doc, url)	{
 	// Check if any of 
 	if (url.includes('#/content/')){
-		return 'journalArticle';
+		return 'book';
 	}
 } 
 
@@ -30,7 +30,7 @@ function doWeb(doc, url) {
 	//item.date = "uppdateras periodiskt";
 
 	// If page contains monograph with information on last update use this information as date
-	if (ZU.xpathText(doc, '//*[@class="mono-updated"]')){
+	if (!url.includes('/bnfc/') && ZU.xpathText(doc, '//*[@class="mono-updated"]')){
 		var revisiondate = ZU.xpathText(doc, '//*[@class="mono-updated"]/text()');
 		item.date = Zotero.Utilities.trimInternal(revisiondate.replace(/Last\ Updated/g, ''));
 		Zotero.debug(revisiondate)
@@ -83,7 +83,6 @@ function doWeb(doc, url) {
 	// British National Formulary for Children
 	else if (url.includes("/bnfc/")) {
 		item.title = "British National Formulary for Children";
-		editors[0] = "Paediatric_Formulary_Committee";
 	}
 
 	// Handbook of Drug Administration via Enteral Feeding Tubes

@@ -9,30 +9,31 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-06 11:31:41"
+	"lastUpdated": "2026-11-06 12:36:20"
 }
 
 function detectWeb(doc, url) {
-	// 1. Check for Drug Interactions tool
-	if (url.includes('drug-interactions')) {
-		return 'journalArticle';
+	// Match the path so query parameters cannot turn a homepage into an article.
+	var path = url.replace(/^https?:\/\/[^/]+/, "").split(/[?#]/)[0];
+	if (/^\/drug-interactions(?:\/|$)/.test(path)) {
+		return 'webpage';
 	}
 
-	// 2. Check for Standard Articles or Drug Info Pages
-	if (url.includes('/contents/')) {
+	if (/^\/contents\/[^/]+/.test(path)) {
 		return 'bookSection';
 	}
 
-	// 3. Fallback
-	if (doc.title && doc.title.includes("UpToDate")) {
-		return "bookSection";
+	// Support loaded articles on alternate routes, but require actual topic content.
+	var topicTitle = doc.getElementById('topicTitle');
+	if (topicTitle && topicTitle.textContent.trim()) {
+		return 'bookSection';
 	}
 }
 
 function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 
-	if (type == "journalArticle") {
+	if (type == "webpage") {
 		var item = new Zotero.Item("webpage");
 		item.title = "Lexicomp® Drug Interactions";
 		item.place = "Waltham, MA, USA";
@@ -58,13 +59,13 @@ function doWeb(doc, url) {
 		// Check if this is a "Drug information" page
 		// Check doc.title because it is consistent even if the DOM ID changes
 		if (doc.title.toLowerCase().includes("drug information")) {
-			item.publicationTitle = "UpToDate Lexidrug";
+			item.bookTitle = "UpToDate Lexidrug";
 			
 			// Optional: Remove ": Drug information" from the Title so it isn't duplicated
 			// Turns "Rituximab: Drug information" -> "Rituximab"
 			//title = title.replace(/:? Drug information/i, "").trim();
 		} else {
-			item.publicationTitle = "UpToDate";
+			item.bookTitle = "UpToDate";
 		}
 		
 		item.title = title;
@@ -89,7 +90,7 @@ function doWeb(doc, url) {
 				if (child.tagName === 'DD' && currentType) {
 					var name = child.textContent.trim();
 					// Clean credentials
-					name = name.replace(/,?\s*(MD|PhD|MBBS|DO|MPH|FACC|FACP|FRCP|MBChB|PharmD).*/g, ""); 
+					name = name.replace(/(?:,\s*|\s+)(?:MD|PhD|DM|DSc|MBBS|DO|MPH|FACC|FACP|FRCP|MBChB|PharmD)\b.*$/, "");
 					item.creators.push(Zotero.Utilities.cleanAuthor(name, currentType));
 				}
 			}

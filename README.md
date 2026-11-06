@@ -17,25 +17,19 @@ When using the Vancouver style the reference will appear as follows (using "Janu
 >Janusmed interaktioner [Internet]. Stockholm: Hälso- och sjukvårdsförvaltningen, Region Stockholm; [citerad 29 juli 2022]. Tillgänglig vid: https://janusmed.se
 
 
-### Lexicomp
-The translator will save a reference for the drug information service [Lexicomp](https://online.lexi.com/). If a specific database is queried for a specific drug (i.e. a drug name is shown next to the database name in the title/header of the webpage) this information is added to the reference. If this information is not available (e.g. for the databases "Drug interactions", "Trissel's IV Compatibility") a more generic reference will be created. If information about the time of the last monograph update is available/loaded, this information will also be included in the reference.
-
-When using the Vancouver style the reference will appear as follows (using Lexi-Drugs Multinational as an example):
->Lexicomp® Online. Domperidone [Internet]. Lexi-Drugs Multinational. Waltham, MA, USA: UpToDate, Inc.; 2022 [citerad 29 juli 2022]. Tillgänglig vid: https://online.lexi.com
-
-
 ### MedicinesComplete
 The translator will save a reference for a selection of databases/publications available (as a subscription) via [MedicinesComplete](https://www.medicinescomplete.com/). The translator detects which publication is loaded and will then return a prespecified reference (conforming to the [citation recommendations of MedicinesComplete](https://about.medicinescomplete.com/copyright/)). The following databases/publication will be detected: Stockley's Drug Interactions, Stockley's Herbal Medicines Interactions, Pharmaceutical Excipients, Injectable Drugs Guide, Herbal Medicines, Briggs Drugs in Pregnancy and Lactation, British National Formulary for Children.
 
 When using the Vancouver style the reference can appear as follows (using Stockley's Drug Interactions as an example):
 >Preston C, redaktör. Stockley’s Drug Interactions [Internet]. London, UK: Pharmaceutical Press; [citerad 29 juli 2022]. Tillgänglig vid: https://www.medicinescomplete.com/
 
+BNFC references are based on URL recognition and use the publication title without editor information.
 
-### Micromedex
-The translator will save a reference for the drug information service [Micromedex](https://www.micromedexsolutions.com/). For some modules/databases (Drug interactions, IV compatibility etc) the specific name of the database/module will be included. For Drugdex, the translator will also fetch the name of the substance and the date when the monograph was last updated (if the "View full document" of "In-Depth Answers" is loaded).
+### Lexicomp
+The translator will save a reference for the drug information service [Lexicomp](https://online.lexi.com/). If a specific database is queried for a specific drug (i.e. a drug name is shown next to the database name in the title/header of the webpage) this information is added to the reference. If this information is not available (e.g. for the databases "Drug interactions", "Trissel's IV Compatibility") a more generic reference will be created. If information about the time of the last monograph update is available/loaded, this information will also be included in the reference.
 
-When using the Vancouver style the reference can appear as follows (using Drugdex and trabectedin as an example):
->MICROMEDEX® Healthcare Series. IDARUCIZUMAB [Internet]. DRUGDEX Evaluations. Greenwood Village, Colorado, USA: IBM Watson Health; 2022 [citerad 29 juli 2022]. Tillgänglig vid: https://www.micromedexsolutions.com/
+When using the Vancouver style the reference will appear as follows (using Lexi-Drugs Multinational as an example):
+>Lexicomp® Online. Domperidone [Internet]. Lexi-Drugs Multinational. Waltham, MA, USA: UpToDate, Inc.; 2022 [citerad 29 juli 2022]. Tillgänglig vid: https://online.lexi.com
 
 
 ### SVELIC
@@ -53,6 +47,12 @@ When using the Vancouver style the reference may appear as follows:
 >Plon SE, Jonasch E. Molecular biology and pathogenesis of von Hippel-Lindau disease. I: Shah S, redaktör. UpToDate [Internet]. UpToDate, Waltham, MA; 2021 [citerad 29 juli 2022]. Tillgänglig vid: https://www.uptodate.com
 
 
+## Archived translators
+
+### Micromedex
+
+Archived because we no longer have access to Micromedex. The translator is preserved in [archive/translators/Micromedex.js](archive/translators/Micromedex.js) for reference and is no longer maintained or tested.
+
 ## Styles
 
 #### Vancouver_unnumbered_bibliography
@@ -68,6 +68,7 @@ Zotero translators should be placed in the “translators” subdirectory of the
 For installation of styles, see the Zotero support page on [Citation Styles](https://www.zotero.org/support/styles).
 
 ## Updates
+
 **2023-08-18**: UpToDate translator updated (last update date not retrieved).
 **2022-08-01**: FASS, SVELIC and UpToDate translators updated. New translators added: Janusmed, MedicinesComplete, Micromedex and Lexicomp. Vancouver_unnumbered_bibliography updated.
 **2021-03-26**: Repository created. FASS, SVELIC and UpToDate translators added. Vancouver_unnumbered_bibliography added.

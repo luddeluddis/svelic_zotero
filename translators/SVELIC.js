@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-01 10:15:20"
+	"lastUpdated": "2026-11-06 12:36:20"
 }
 
 // 2022-07-19 Now returns all information to title item to comply with the Relis/Svelic citation style
 function detectWeb(doc, url)	{
 	if (url.includes("utredning")){
-	return 'journalArticle';
+	return 'webpage';
 	}
 }
 

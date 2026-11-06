@@ -15,33 +15,6 @@ translator_id() {
     ' "$1"
 }
 
-find_bundled_uptodate() {
-    local directory="$1" candidate checked=0
-    bundled_paths=()
-    bundled_found=0
-    printf 'Checking for Zotero bundled UpToDate translator...\n'
-    for candidate in "$directory/UpToDate References.js" "$directory/UpToDate.js"; do
-        [ -f "$candidate" ] || continue
-        if [ "$(translator_id "$candidate")" = '70dc2609-d6fd-415a-822c-a2c04293cb5a' ]; then
-            bundled_paths[$bundled_found]="$candidate"
-            bundled_found=$((bundled_found + 1))
-        fi
-    done
-    # Avoid opening unrelated translators when a usual filename identifies the bundled ID.
-    if [ "$bundled_found" -gt 0 ]; then return 0; fi
-    printf 'No bundled translator at its usual filenames. Checking metadata headers for a renamed copy...\n'
-    for candidate in "$directory/"*.js; do
-        [ -f "$candidate" ] || continue
-        case "${candidate##*/}" in 'UpToDate References.js'|'UpToDate.js') continue ;; esac
-        checked=$((checked + 1))
-        if [ $((checked % 100)) -eq 0 ]; then printf 'Checked %s translator metadata headers...\n' "$checked"; fi
-        if [ "$(translator_id "$candidate")" = '70dc2609-d6fd-415a-822c-a2c04293cb5a' ]; then
-            bundled_paths[$bundled_found]="$candidate"
-            bundled_found=$((bundled_found + 1))
-        fi
-    done
-}
-
 wait_zotero_closed() {
     local answer status
     while true; do
@@ -83,8 +56,8 @@ installer_cleanup() {
 
 install_zotero_files() {
     local data_directory="$HOME/Zotero" repository='luddeluddis/svelic_zotero' ref='main'
-    local disable='ask' answer tool encoded_ref commit base file destination saved candidate disabled status
-    local backup='' bundled_count=0 bundled_index=0
+    local answer tool encoded_ref commit base file destination saved status
+    local backup=''
     local files=(
         'translators/FASS.js'
         'translators/Janusmed.js'
@@ -96,27 +69,24 @@ install_zotero_files() {
     )
     while [ "$#" -gt 0 ]; do
         case "$1" in
-            --data-directory|--repository|--ref|--disable-default-uptodate)
+            --data-directory|--repository|--ref)
                 [ "$#" -ge 2 ] || installer_error "Missing value for $1"
                 case "$1" in
                     --data-directory) data_directory="$2" ;;
                     --repository) repository="$2" ;;
                     --ref) ref="$2" ;;
-                    --disable-default-uptodate) disable="$2" ;;
                 esac
                 shift 2 ;;
             --help|-h)
                 printf 'Install SVELIC translators and style into an existing Zotero library.\n'
                 printf 'Usage: bash install-translators-and-style.sh [options]\n'
                 printf '  --data-directory PATH            Default: ~/Zotero\n'
-                printf '  --disable-default-uptodate MODE   ask (default), yes, or no\n'
                 printf '  --repository OWNER/NAME          Default: luddeluddis/svelic_zotero\n'
                 printf '  --ref BRANCH-OR-COMMIT            Default: main\n'
                 return 0 ;;
             *) installer_error "Unknown option: $1 (use --help)" ;;
         esac
     done
-    case "$disable" in ask|yes|no) ;; *) installer_error 'Choose ask, yes, or no for --disable-default-uptodate.' ;; esac
     [[ "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || installer_error 'Invalid repository name.'
     [[ "$ref" =~ ^[A-Za-z0-9_./-]+$ ]] || installer_error 'Invalid branch or commit.'
     for tool in curl pgrep awk grep mktemp cmp cp mv id date; do
@@ -133,17 +103,6 @@ install_zotero_files() {
     done
     data_directory=$(cd -- "$data_directory" && pwd -P)
     printf 'Zotero data directory: %s\n' "$data_directory"
-    if [ "$disable" = ask ]; then
-        while true; do
-            printf 'Disable Zotero bundled UpToDate References translator? Your UpToDate_article.js stays enabled. [Y/n]: '
-            if ! IFS= read -r answer; then printf '\nInstallation cancelled.\n'; return 0; fi
-            case "$answer" in
-                ''|y|Y|yes|Yes|YES) disable=yes; break ;;
-                n|N|no|No|NO) disable=no; break ;;
-                *) printf 'Please enter Y or N.\n' ;;
-            esac
-        done
-    fi
     stage=$(mktemp -d "${TMPDIR:-/tmp}/svelic-zotero.XXXXXX")
     encoded_ref=${ref//\//%2F}
     fetch_file "https://api.github.com/repos/$repository/commits/$encoded_ref" "$stage/commit.json"
@@ -194,22 +153,6 @@ install_zotero_files() {
         pending=''
         printf 'Installed: %s\n' "$file"
     done
-    if [ "$disable" = yes ]; then
-        find_bundled_uptodate "$data_directory/translators"
-        for ((bundled_index = 0; bundled_index < bundled_found; bundled_index++)); do
-            candidate="${bundled_paths[$bundled_index]}"
-            disabled="$candidate.disabled"
-            if [ -e "$disabled" ]; then
-                pending=$(mktemp "$candidate.disabled.XXXXXX")
-                disabled="$pending"
-            fi
-            mv -- "$candidate" "$disabled"
-            pending=''
-            bundled_count=$((bundled_count + 1))
-            printf 'Disabled bundled translator: %s -> %s\n' "${candidate##*/}" "${disabled##*/}"
-        done
-        if [ "$bundled_count" -eq 0 ]; then printf 'Bundled UpToDate References translator is absent or already disabled.\n'; fi
-    fi
     if [ -n "$backup" ]; then printf 'Previous files backed up to: %s\n' "$backup"; fi
     printf 'Finished. Source commit: %s\n' "$commit"
     printf 'Open Zotero, restart your browser, and reload the article page.\n'

@@ -5,11 +5,11 @@
 	"target": "^https:?\\/\\/www\\.uptodate\\.com\\/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 50,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 12:36:20"
+	"lastUpdated": "2026-11-06 14:18:44"
 }
 
 function detectWeb(doc, url) {

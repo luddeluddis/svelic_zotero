@@ -40,7 +40,7 @@ When using the Vancouver style the reference may appear as follows:
 
 
 ### UpToDate_article
-The translator saves the loaded [UpToDate](https://www.uptodate.com/) clinical article or drug-information monograph as a book section. Clinical articles use **UpToDate** as the book title; drug-information pages use **UpToDate Lexidrug**. Authors, editors and the last-update date are extracted when available, and a link to the specific article is saved. The UpToDate Drug Interactions tool receives a generic reference titled **Lexicomp® Drug Interactions**. Let the page finish loading before saving; a reload may be needed if it is not recognised.
+The translator saves the loaded [UpToDate](https://www.uptodate.com/) clinical article or drug-information monograph as a book section. Clinical articles use **UpToDate** as the book title; drug-information pages use **UpToDate Lexidrug**. Authors, editors and the last-update date are extracted when available, and a link to the specific article is saved. The UpToDate Drug Interactions tool receives a generic reference titled **Lexicomp® Drug Interactions**. The translator uses priority 50, ahead of Zotero's bundled **UpToDate References** translator at priority 100, so both can remain installed. Let the page finish loading before saving; a reload may be needed if it is not recognised.
 
 When using the Vancouver style the reference may appear as follows:
 
@@ -72,7 +72,7 @@ Install Zotero first, then download the installer for your operating system to a
 - **macOS:** [Download the `.command` installer](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.command), make it executable, and run it as described in the [macOS instructions](installer/README.md#macos-and-linux-installers).
 - **Linux:** [Download the `.sh` installer](https://raw.githubusercontent.com/luddeluddis/svelic_zotero/main/installer/install-translators-and-style.sh) and run `bash ~/Downloads/install-translators-and-style.sh`.
 
-The installers skip unchanged files, back up replaced files, and ask whether to disable Zotero's bundled UpToDate translator (default: Yes). This repository's `UpToDate_article.js` stays enabled. After installation, select **NLM/Vancouver (unnumbered bibliography)** in Zotero or your Word document's Zotero preferences.
+The installers skip unchanged files and back up replaced files. This repository's `UpToDate_article.js` takes precedence over Zotero's bundled references translator on article pages, so both can remain installed. After installation, select **NLM/Vancouver (unnumbered bibliography)** in Zotero or your Word document's Zotero preferences.
 
 See the [installer instructions](installer/README.md) for setup details, custom locations, and restoring backups.
 
@@ -84,7 +84,7 @@ Download [the citation style](styles/nlm-citation-sequence-unnumbered-bibliograp
 
 ## Updates
 
-**2026-11-06**: Added Windows, macOS, and Linux installers for the translators and citation style, with update checks, backups, and optional deactivation of Zotero's bundled UpToDate translator. Translator detection and metadata handling updated, including multi-substance FASS products and UpToDate articles/drug information. BNFC references omit editor information. Micromedex archived because it is no longer used. The unnumbered bibliography style is now based on NLM/Vancouver and renamed `nlm-citation-sequence-unnumbered-bibliography.csl`.
+**2026-11-06**: Added Windows, macOS, and Linux installers for the translators and citation style, with update checks and backups. The custom UpToDate article translator now uses priority 50 to take precedence over Zotero's bundled references translator; installers no longer scan for or rename the bundled translator. Translator detection and metadata handling updated, including multi-substance FASS products and UpToDate articles/drug information. BNFC references omit editor information. Micromedex archived because it is no longer used. The unnumbered bibliography style is now based on NLM/Vancouver and renamed `nlm-citation-sequence-unnumbered-bibliography.csl`.
 
 **2023-08-18**: UpToDate translator updated (last update date not retrieved).
 **2022-08-01**: FASS, SVELIC and UpToDate translators updated. New translators added: Janusmed, MedicinesComplete, Micromedex and Lexicomp. Vancouver_unnumbered_bibliography updated.

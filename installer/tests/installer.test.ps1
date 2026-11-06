@@ -28,25 +28,26 @@ function Invoke-WebRequest {
 function Assert($Condition, [string]$Message) { if (-not $Condition) { throw $Message } }
 function Write-Bundled([string]$Name) {
     $path = Join-Path $DataDirectory "translators/$Name"
-    # A different filename tests ID-based identification, including the current bundled name.
-    [IO.File]::WriteAllText($path, "{`n`"translatorID`":`"70dc2609-d6fd-415a-822c-a2c04293cb5a`",`n`"label`":`"UpToDate References`"`n}")
+    # Bundled translators must be preserved regardless of filename.
+    [IO.File]::WriteAllText($path, "{`n`"translatorID`":`"70dc2609-d6fd-415a-822c-a2c04293cb5a`",`n`"label`":`"UpToDate References`",`n`"priority`":100`n}")
     return $path
 }
 try {
     New-Item -ItemType Directory -Path (Join-Path $DataDirectory 'translators') -Force | Out-Null
     New-Item -ItemType File -Path (Join-Path $DataDirectory 'zotero.sqlite') | Out-Null
     $bundled = Write-Bundled 'UpToDate References.js'
-    $DisableDefaultUpToDate = 'Ask'
     Install-ZoteroFiles
-    Assert (Test-Path -LiteralPath "$bundled.disabled") 'Default Yes did not disable the bundled translator'
-    Assert (-not (Test-Path -LiteralPath $bundled)) 'Bundled translator is still enabled'
+    Assert (Test-Path -LiteralPath $bundled) 'Bundled translator was removed'
+    Assert (-not (Test-Path -LiteralPath "$bundled.disabled")) 'Bundled translator was renamed'
     $custom = Join-Path $DataDirectory 'translators/UpToDate_article.js'
     Assert ((Get-TranslatorMetadata $custom).translatorID -eq '4af8c4da-cf3d-4ec2-989f-15d4d0723bf1') 'Custom translator missing or disabled'
+    Assert ((Get-TranslatorMetadata $custom).priority -eq 50) 'Custom translator priority was not installed'
+    Assert ((Get-TranslatorMetadata $custom).priority -lt (Get-TranslatorMetadata $bundled).priority) 'Custom translator does not take precedence'
+    Assert ($script:promptCount -eq 0) 'Installer unexpectedly prompted to disable a translator'
     $style = Join-Path $DataDirectory 'styles/nlm-citation-sequence-unnumbered-bibliography.csl'
     Assert (Test-Path -LiteralPath $style) 'Style was not installed'
     $firstStyleTime = (Get-Item -LiteralPath $style).LastWriteTimeUtc
     $firstTime = (Get-Item -LiteralPath $custom).LastWriteTimeUtc
-    $DisableDefaultUpToDate = 'Yes'
     Install-ZoteroFiles
     Assert ((Get-Item -LiteralPath $custom).LastWriteTimeUtc -eq $firstTime) 'Unchanged file was rewritten'
     Assert ((Get-Item -LiteralPath $style).LastWriteTimeUtc -eq $firstStyleTime) 'Unchanged style was rewritten'
@@ -60,18 +61,16 @@ try {
     Assert ([IO.File]::ReadAllText($backups[0].FullName) -eq 'old custom translator') 'Backup content changed'
     Assert ((Get-TranslatorMetadata $custom).label -eq 'UpToDate article') 'Custom update failed'
 
-    $bundled = Write-Bundled 'Renamed bundled.js'
-    $DisableDefaultUpToDate = 'Ask'
-    $script:answer = 'n'
+    $renamed = Write-Bundled 'Renamed bundled.js'
+    $legacyDisabled = "$bundled.disabled"
+    Copy-Item -LiteralPath $bundled -Destination $legacyDisabled
+    $bundledBefore = (Get-FileHash -LiteralPath $bundled).Hash
+    $renamedBefore = (Get-FileHash -LiteralPath $renamed).Hash
+    $disabledBefore = (Get-FileHash -LiteralPath $legacyDisabled).Hash
     Install-ZoteroFiles
-    Assert (Test-Path -LiteralPath $bundled) 'No choice was ignored'
-    $DisableDefaultUpToDate = 'Yes'
-    Install-ZoteroFiles
-    Assert (Test-Path -LiteralPath "$bundled.disabled") 'Renamed bundled translator was not disabled by ID'
-    $null = Write-Bundled 'Renamed bundled.js'
-    Install-ZoteroFiles
-    Assert (@(Get-ChildItem -LiteralPath (Split-Path $bundled) -Filter 'Renamed bundled.js.disabled*').Count -eq 2) 'Earlier disabled copy was overwritten'
-    Assert (Test-Path -LiteralPath $custom) 'Custom translator disabled during repeated runs'
+    Assert ((Get-FileHash -LiteralPath $bundled).Hash -eq $bundledBefore) 'Bundled translator was changed'
+    Assert ((Get-FileHash -LiteralPath $renamed).Hash -eq $renamedBefore) 'Renamed bundled translator was changed'
+    Assert ((Get-FileHash -LiteralPath $legacyDisabled).Hash -eq $disabledBefore) 'Previous disabled backup was changed'
 
     # A bad final download must prevent changes to every earlier file.
     [IO.File]::WriteAllText($style, 'old local style')
@@ -105,37 +104,6 @@ try {
     try { Install-ZoteroFiles } catch { $failed = $true }
     Assert $failed 'Download failure was ignored'
     Assert ((Get-FileHash -LiteralPath $custom).Hash -eq $before) 'Failed download changed installed translator'
-    # A normal installation must not open unrelated translator files.
-    $fastDirectory = Join-Path $testRoot 'Many translators'
-    New-Item -ItemType Directory -Path $fastDirectory | Out-Null
-    for ($i = 0; $i -lt 300; $i++) {
-        [IO.File]::WriteAllText((Join-Path $fastDirectory "Unrelated-$i.js"), 'Not metadata; must not be opened on the fast path')
-    }
-    $known = Join-Path $fastDirectory 'UpToDate References.js'
-    [IO.File]::WriteAllText($known, "{`n`"translatorID`":`"70dc2609-d6fd-415a-822c-a2c04293cb5a`",`n`"label`":`"UpToDate References`"`n}`n" + ('x' * 1000000))
-    # Even a misleading filename containing the custom translator must stay enabled.
-    Copy-Item -LiteralPath (Join-Path $sourceRoot 'translators/UpToDate_article.js') -Destination (Join-Path $fastDirectory 'UpToDate.js')
-    $script:originalHeaderReader = ${function:Get-TranslatorHeader}
-    $script:headersRead = New-Object 'Collections.Generic.List[string]'
-    function Get-TranslatorHeader([string]$Path) {
-        $script:headersRead.Add($Path)
-        & $script:originalHeaderReader $Path
-    }
-    $found = @(Find-BundledUpToDate $fastDirectory)
-    Assert ($found.Count -eq 1 -and $found[0] -eq $known) 'Known filename did not identify only the bundled ID'
-    Assert ($script:headersRead.Count -eq 2) 'Fast path opened unrelated translators'
-    $header = Get-TranslatorHeader $known
-    Assert ($header.Length -lt 1000) 'Reader returned translator code instead of only metadata'
-
-    # Fallback still finds a renamed bundled file and ignores IDs occurring in code.
-    $fallbackDirectory = Join-Path $testRoot 'Renamed translator search'
-    New-Item -ItemType Directory -Path $fallbackDirectory | Out-Null
-    $renamed = Join-Path $fallbackDirectory 'Renamed.js'
-    Copy-Item -LiteralPath $known -Destination $renamed
-    $decoy = Join-Path $fallbackDirectory 'Decoy.js'
-    [IO.File]::WriteAllText($decoy, "{`n`"translatorID`":`"different-id`",`n`"label`":`"Other translator`"`n}`n// 70dc2609-d6fd-415a-822c-a2c04293cb5a")
-    $found = @(Find-BundledUpToDate $fallbackDirectory)
-    Assert ($found.Count -eq 1 -and $found[0] -eq $renamed) 'Fallback matched translator code or missed renamed bundled translator'
-    Write-Host 'PASS: install, default Yes, opt-out, ID matching, custom protection, repeat runs, backups, running Zotero, download failure, fast lookup and bounded metadata reads.'
+    Write-Host 'PASS: install, custom priority, bundled translators preserved, repeat runs, backups, running Zotero, download failure.'
 }
 finally { Remove-Item -LiteralPath $testRoot -Recurse -Force }

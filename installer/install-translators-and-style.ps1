@@ -4,9 +4,7 @@ param(
     [string]$DataDirectory = (Join-Path ([Environment]::GetFolderPath('UserProfile')) 'Zotero'),
     [ValidatePattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
     [string]$Repository = 'luddeluddis/svelic_zotero',
-    [string]$Ref = 'main',
-    [ValidateSet('Ask', 'Yes', 'No')]
-    [string]$DisableDefaultUpToDate = 'Ask'
+    [string]$Ref = 'main'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,46 +34,6 @@ function Get-TranslatorMetadata([string]$Path) {
     return $metadata
 }
 
-function Find-BundledUpToDate([string]$Directory) {
-    $bundledID = '70dc2609-d6fd-415a-822c-a2c04293cb5a'
-    $knownNames = @('UpToDate References.js', 'UpToDate.js')
-    $found = @()
-    Write-Host 'Checking for Zotero bundled UpToDate translator...'
-    foreach ($name in $knownNames) {
-        $path = Join-Path $Directory $name
-        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { continue }
-        try {
-            $metadata = Get-TranslatorMetadata $path
-            if ($metadata.translatorID -eq $bundledID) { $found += $path }
-        }
-        catch { Write-Warning "Cannot inspect $name; not considered for disabling." }
-    }
-    # Normal installations need only the known filenames, never a library-wide scan.
-    if ($found.Count) { return $found }
-
-    Write-Host 'No bundled translator at its usual filenames. Checking metadata headers for a renamed copy...'
-    $checked = 0
-    try {
-        foreach ($path in [IO.Directory]::EnumerateFiles($Directory, '*.js')) {
-            if ($knownNames -contains [IO.Path]::GetFileName($path)) { continue }
-            $checked++
-            if ($checked % 100 -eq 0) {
-                Write-Progress -Activity 'Checking translator metadata headers' -Status "$checked checked"
-            }
-            try {
-                $header = Get-TranslatorHeader $path
-                # Most headers need no JSON parsing. Always verify the ID before disabling.
-                if ($header.IndexOf($bundledID, [StringComparison]::OrdinalIgnoreCase) -lt 0) { continue }
-                $metadata = $header | ConvertFrom-Json
-                if ($metadata.translatorID -eq $bundledID) { $found += $path }
-            }
-            catch { Write-Warning "Cannot inspect $([IO.Path]::GetFileName($path)); not considered for disabling." }
-        }
-    }
-    finally { Write-Progress -Activity 'Checking translator metadata headers' -Completed }
-    return $found
-}
-
 function Wait-ZoteroClosed {
     while (Get-Process -Name zotero -ErrorAction SilentlyContinue) {
         Write-Host ''
@@ -101,13 +59,6 @@ function Install-ZoteroFiles {
     }
     $DataDirectory = (Resolve-Path -LiteralPath $DataDirectory).Path
     Write-Host "Zotero data directory: $DataDirectory"
-
-    if ($DisableDefaultUpToDate -eq 'Ask') {
-        $answer = Read-Host 'Disable Zotero bundled UpToDate References translator? Your UpToDate_article.js stays enabled. [Y/n]'
-        if ($answer.Trim() -match '^(?i:n|no)$') { $DisableDefaultUpToDate = 'No' }
-        elseif ([string]::IsNullOrWhiteSpace($answer) -or $answer.Trim() -match '^(?i:y|yes)$') { $DisableDefaultUpToDate = 'Yes' }
-        else { throw 'Unrecognised answer. Run again and enter Y or N.' }
-    }
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
     $headers = @{ 'User-Agent' = 'SVELIC-Zotero-Installer'; 'Accept' = 'application/vnd.github+json' }
@@ -144,15 +95,10 @@ function Install-ZoteroFiles {
                 }
             }
         }
-        # Match the bundled translator by ID, not its name. Never disable the custom ID.
+        # Verify the custom translator before replacing the installed copy.
         $customID = '4af8c4da-cf3d-4ec2-989f-15d4d0723bf1'
         $custom = Get-TranslatorMetadata (Join-Path $stage 'translators/UpToDate_article.js')
         if ($custom.translatorID -ne $customID) { throw 'Unexpected ID for the custom UpToDate translator.' }
-        $bundled = @()
-        $translatorDirectory = Join-Path $DataDirectory 'translators'
-        if ($DisableDefaultUpToDate -eq 'Yes' -and (Test-Path -LiteralPath $translatorDirectory)) {
-            $bundled = @(Find-BundledUpToDate $translatorDirectory)
-        }
         if (-not (Wait-ZoteroClosed)) { return }
         foreach ($file in $files) {
             $download = Join-Path $stage $file
@@ -176,16 +122,6 @@ function Install-ZoteroFiles {
             }
             finally { if (Test-Path -LiteralPath $pending) { Remove-Item -LiteralPath $pending } }
             Write-Host "Installed: $file"
-        }
-        foreach ($path in $bundled) {
-            $disabled = "$path.disabled"
-            # Keep earlier backups when Zotero has restored its bundled translator.
-            if (Test-Path -LiteralPath $disabled) { $disabled += '.' + [guid]::NewGuid().ToString('N') }
-            Move-Item -LiteralPath $path -Destination $disabled
-            Write-Host "Disabled bundled translator: $(Split-Path $path -Leaf) -> $(Split-Path $disabled -Leaf)"
-        }
-        if ($DisableDefaultUpToDate -eq 'Yes' -and $bundled.Count -eq 0) {
-            Write-Host 'Bundled UpToDate References translator is absent or already disabled.'
         }
         if (Test-Path -LiteralPath $backup) { Write-Host "Previous files backed up to: $backup" }
         Write-Host "Finished. Source commit: $($commit.sha)"

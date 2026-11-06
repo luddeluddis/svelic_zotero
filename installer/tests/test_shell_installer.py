@@ -73,42 +73,42 @@ class ShellInstallerTests(unittest.TestCase):
     def bundled(self, name='UpToDate References.js'):
         path = self.library / 'translators' / name
         path.parent.mkdir(exist_ok=True)
-        path.write_text(json.dumps({'translatorID': BUNDLED_ID, 'label': 'UpToDate References'}, indent=2))
+        path.write_text(json.dumps({'translatorID': BUNDLED_ID, 'label': 'UpToDate References', 'priority': 100}, indent=2))
         return path
 
-    def test_install_default_yes_and_repeat_skip(self):
+    def test_install_without_prompts_preserves_bundled_and_skips_unchanged(self):
         bundled = self.bundled()
-        self.run_installer(answers='\n')
-        self.assertFalse(bundled.exists())
-        self.assertTrue(Path(str(bundled) + '.disabled').exists())
+        before_bundled = bundled.read_bytes()
+        result = self.run_installer()
+        self.assertNotIn('Disable', result.stdout)
+        self.assertEqual(bundled.read_bytes(), before_bundled)
+        self.assertFalse(Path(str(bundled) + '.disabled').exists())
+        custom = self.library / 'translators/UpToDate_article.js'
+        metadata = json.JSONDecoder().raw_decode(custom.read_text())[0]
+        self.assertEqual(metadata['priority'], 50)
+        self.assertLess(metadata['priority'], json.loads(bundled.read_text())['priority'])
         expected = list((ROOT / 'translators').glob('*.js')) + list((ROOT / 'styles').glob('*.csl'))
         before = {}
         for source in expected:
             target = self.library / source.relative_to(ROOT)
             self.assertEqual(target.read_bytes(), source.read_bytes())
             before[target] = target.stat().st_mtime_ns
-        result = self.run_installer('--disable-default-uptodate', 'yes')
+        result = self.run_installer()
         self.assertEqual(result.stdout.count('Unchanged:'), len(expected))
         self.assertEqual(before, {p: p.stat().st_mtime_ns for p in before})
         self.assertFalse((self.library / 'svelic-installer-backups').exists())
         self.assertEqual((self.library / 'zotero.sqlite').read_bytes(), b'library sentinel')
 
-    def test_opt_out_and_disable_by_id_only(self):
+    def test_renamed_bundled_and_previous_disabled_backups_are_untouched(self):
         bundled = self.bundled('Renamed bundled translator.js')
-        other = self.library / 'translators/UpToDate.js'
-        other.write_text(json.dumps({'translatorID': 'different-id', 'label': 'UpToDate References'}, indent=2))
-        self.run_installer(answers='n\n')
-        self.assertTrue(bundled.exists())
-        self.run_installer('--disable-default-uptodate', 'yes')
-        self.assertFalse(bundled.exists())
-        self.assertTrue(other.exists())
-        custom = self.library / 'translators/UpToDate_article.js'
-        self.assertEqual(custom.read_bytes(), (ROOT / 'translators/UpToDate_article.js').read_bytes())
-        self.bundled(bundled.name)
-        self.run_installer('--disable-default-uptodate', 'yes')
-        self.assertEqual(len(list(bundled.parent.glob(bundled.name + '.disabled*'))), 2)
+        legacy_disabled = self.library / 'translators/UpToDate References.js.disabled'
+        shutil.copyfile(bundled, legacy_disabled)
+        before = {p: p.read_bytes() for p in [bundled, legacy_disabled]}
+        self.run_installer()
+        self.run_installer()
+        self.assertEqual(before, {p: p.read_bytes() for p in before})
 
-    def test_known_filenames_skip_unrelated_translators(self):
+    def test_does_not_scan_existing_translators(self):
         bundled = self.bundled()
         custom_named_legacy = bundled.parent / 'UpToDate.js'
         shutil.copyfile(ROOT / 'translators/UpToDate_article.js', custom_named_legacy)
@@ -122,33 +122,22 @@ class ShellInstallerTests(unittest.TestCase):
             f'with open({str(log)!r}, "a") as output: output.write(json.dumps(sys.argv[-1]) + "\\n")\n'
             f'os.execv({real_awk!r}, [{real_awk!r}] + sys.argv[1:])\n')
         (self.bin / 'awk').chmod(0o755)
-        result = self.run_installer('--disable-default-uptodate', 'yes')
+        result = self.run_installer()
         installed_reads = [Path(json.loads(line)) for line in log.read_text().splitlines()
                            if Path(json.loads(line)).parent == bundled.parent]
-        self.assertEqual(set(installed_reads), {bundled, custom_named_legacy})
+        self.assertEqual(installed_reads, [])
         self.assertNotIn('Checking metadata headers for a renamed copy', result.stdout)
         self.assertTrue(custom_named_legacy.exists())
         self.assertTrue((bundled.parent / 'UpToDate_article.js').exists())
-        self.assertTrue(Path(str(bundled) + '.disabled').exists())
-
-    def test_fallback_reports_progress_and_ignores_id_in_code(self):
-        bundled = self.bundled('Renamed.js')
-        for number in range(100):
-            (bundled.parent / f'Other-{number}.js').write_text(
-                json.dumps({'translatorID': 'unrelated-id', 'label': 'Other'}, indent=2)
-                + '\n// ' + BUNDLED_ID)
-        result = self.run_installer('--disable-default-uptodate', 'yes')
-        self.assertIn('Checking metadata headers for a renamed copy', result.stdout)
-        self.assertIn('Checked 100 translator metadata headers', result.stdout)
-        self.assertTrue(Path(str(bundled) + '.disabled').exists())
-        self.assertEqual(len(list(bundled.parent.glob('Other-*.js'))), 100)
+        self.assertTrue(bundled.exists())
+        self.assertFalse(Path(str(bundled) + '.disabled').exists())
 
     def test_style_and_translator_updates_back_up_originals(self):
-        self.run_installer('--disable-default-uptodate', 'no')
+        self.run_installer()
         paths = ['translators/FASS.js', 'styles/nlm-citation-sequence-unnumbered-bibliography.csl']
         for relative in paths:
             (self.library / relative).write_text('old local contents')
-        self.run_installer('--disable-default-uptodate', 'no')
+        self.run_installer()
         backup_runs = list((self.library / 'svelic-installer-backups').iterdir())
         self.assertEqual(len(backup_runs), 1)
         for relative in paths:
@@ -163,7 +152,7 @@ class ShellInstallerTests(unittest.TestCase):
                                ('SVELIC_TEST_INVALID', 'UpToDate_article.js')]:
             with self.subTest(option=option, suffix=suffix):
                 self.env[option] = suffix
-                self.run_installer('--disable-default-uptodate', 'yes', success=False)
+                self.run_installer(success=False)
                 self.assertTrue(bundled.exists())
                 self.assertEqual(len(list((self.library / 'translators').iterdir())), 1)
                 self.assertFalse((self.library / 'styles').exists())
@@ -175,18 +164,18 @@ class ShellInstallerTests(unittest.TestCase):
         self.assertIn('Installation cancelled', result.stdout)
         self.assertNotIn('downloads', json.loads(self.state.read_text()))
         self.state.write_text('{}')
-        result = self.run_installer(answers='\n\n', processes=[0, 1, 1])
+        result = self.run_installer(answers='\n', processes=[0, 1, 1])
         self.assertIn('press Enter to retry', result.stdout)
         self.assertTrue((self.library / 'translators/UpToDate_article.js').exists())
 
     def test_zotero_opened_during_download(self):
-        result = self.run_installer('--disable-default-uptodate', 'no', answers='q\n', processes=[1, 0])
+        result = self.run_installer(answers='q\n', processes=[1, 0])
         self.assertIn('Installation cancelled', result.stdout)
         self.assertFalse((self.library / 'translators').exists())
 
     def test_pretty_github_api_response(self):
         self.env['SVELIC_TEST_PRETTY_JSON'] = '1'
-        self.run_installer('--disable-default-uptodate', 'no')
+        self.run_installer()
 
     def test_process_check_failure_is_reported(self):
         result = self.run_installer(processes=[2], success=False)
@@ -202,12 +191,12 @@ class ShellInstallerTests(unittest.TestCase):
     def test_macos_launcher_with_local_and_downloaded_shell_script(self):
         launcher = self.directory / 'install-translators-and-style.command'
         shutil.copyfile(ROOT / 'installer/install-translators-and-style.command', launcher)
-        self.run_installer('--disable-default-uptodate', 'no', script=launcher)
+        self.run_installer(script=launcher)
         self.assertTrue(any(url.endswith('install-translators-and-style.sh')
                             for url in json.loads(self.state.read_text())['downloads']))
         shutil.copyfile(SCRIPT, self.directory / SCRIPT.name)
         self.state.write_text('{}')
-        self.run_installer('--disable-default-uptodate', 'no', script=launcher)
+        self.run_installer(script=launcher)
         self.assertFalse(any(url.endswith('install-translators-and-style.sh')
                              for url in json.loads(self.state.read_text())['downloads']))
 
